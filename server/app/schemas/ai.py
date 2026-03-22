@@ -5,7 +5,7 @@ from typing import Optional, List
 class HintRequest(BaseModel):
     problem_id: str
     hint_level: int = 1  # 1=subtle, 2=moderate, 3=strong
-    path: str  # 'pirate' | 'marine'
+    path: str  # 'fighter' | 'sentinel'
 
 
 class HintResponse(BaseModel):

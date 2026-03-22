@@ -28,7 +28,7 @@ class Submission(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     user_id: str
     problem_id: str
-    path: str  # 'pirate' | 'marine'
+    path: str  # 'fighter' | 'sentinel'
 
     code: str
     language: str

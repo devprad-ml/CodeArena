@@ -45,7 +45,7 @@ Return ONLY the JSON, no other text."""
 
 
 class QuestionGenerator:
-    """LLM-powered question generator for System Design (Marine) path"""
+    """LLM-powered question generator for System Design (Sentinel) path"""
 
     def __init__(self):
         self.api_key = settings.OPENAI_API_KEY
@@ -167,7 +167,7 @@ class QuestionGenerator:
                 slug=data.get("slug", data["title"].lower().replace(" ", "-")),
                 description=data["description"],
                 difficulty=difficulty,
-                path="marine",
+                path="sentinel",
                 category=category,
                 evaluation_criteria=evaluation_criteria,
                 constraints=data.get("constraints", ""),

@@ -18,7 +18,7 @@ class RAGService:
             return "easy"
 
         progress = (
-            user.pirate_progress if path == "pirate" else user.marine_progress
+            user.fighter_progress if path == "fighter" else user.sentinel_progress
         )
         rank_index = progress.rank
 

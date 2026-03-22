@@ -17,7 +17,7 @@ class ProgressData(BaseModel):
 class UserPreferences(BaseModel):
     default_language: str = "python"
     timer_duration: int = 30  # minutes
-    theme: str = "pirate"  # 'pirate' | 'marine' | 'auto'
+    theme: str = "fighter"  # 'fighter' | 'sentinel' | 'auto'
 
 
 class User(BaseModel):
@@ -28,8 +28,8 @@ class User(BaseModel):
     provider: str  # 'google' | 'github'
     provider_id: str
 
-    pirate_progress: ProgressData = ProgressData()
-    marine_progress: ProgressData = ProgressData()
+    fighter_progress: ProgressData = ProgressData()
+    sentinel_progress: ProgressData = ProgressData()
 
     preferences: UserPreferences = UserPreferences()
     achievements: List[str] = []

@@ -46,7 +46,7 @@ async def evaluate_design(
     request: EvaluateRequest,
     current_user: User = Depends(get_current_user),
 ):
-    """Evaluate system design answer (Marine path)"""
+    """Evaluate system design answer (Sentinel path)"""
     ai_judge = AIJudge()
     evaluation = await ai_judge.evaluate_system_design(
         problem_id=request.problem_id,

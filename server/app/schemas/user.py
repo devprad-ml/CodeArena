@@ -11,8 +11,8 @@ class UserResponse(BaseModel):
     username: str
     avatar: Optional[str] = None
     provider: str
-    pirate_progress: ProgressData
-    marine_progress: ProgressData
+    fighter_progress: ProgressData
+    sentinel_progress: ProgressData
     preferences: UserPreferences
     achievements: List[str] = []
     created_at: datetime
@@ -32,8 +32,8 @@ class UserPreferencesUpdate(BaseModel):
 
 class UserStatsResponse(BaseModel):
     total_problems_solved: int = 0
-    pirate_progress: ProgressData
-    marine_progress: ProgressData
+    fighter_progress: ProgressData
+    sentinel_progress: ProgressData
     current_streak: int = 0
     best_streak: int = 0
     total_time_spent: float = 0  # hours

@@ -27,13 +27,13 @@ class Problem(BaseModel):
     slug: str
     description: str  # Markdown
     difficulty: str  # 'easy' | 'medium' | 'hard' | 'expert'
-    path: str  # 'pirate' | 'marine'
+    path: str  # 'fighter' | 'sentinel'
     category: str  # 'arrays', 'trees', 'lld', etc.
 
-    # For DSA (Pirate)
+    # For DSA (Fighter)
     test_cases: List[TestCase] = []
 
-    # For System Design (Marine)
+    # For System Design (Sentinel)
     evaluation_criteria: List[EvaluationCriterion] = []
 
     constraints: str = ""

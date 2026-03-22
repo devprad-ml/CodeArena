@@ -4,7 +4,7 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     # App
-    APP_NAME: str = "Grand Line Coder"
+    APP_NAME: str = "CodeArena"
     DEBUG: bool = False
 
     # Server

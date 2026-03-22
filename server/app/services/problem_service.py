@@ -18,14 +18,14 @@ class ProblemService:
     async def get_next_problem(self, user_id: str, path: str) -> Optional[Problem]:
         """
         Get next problem using hybrid approach:
-        - Pirate (DSA): pick from curated database
-        - Marine (System Design): generate via LLM, fall back to database
+        - Fighter (DSA): pick from curated database
+        - Sentinel (System Design): generate via LLM, fall back to database
         """
         recommended_difficulty = await self.rag_service.get_recommended_difficulty(
             user_id, path
         )
 
-        if path == "pirate":
+        if path == "fighter":
             return await self._get_dsa_problem(user_id, recommended_difficulty)
         else:
             return await self._get_design_problem(
@@ -37,7 +37,7 @@ class ProblemService:
     ) -> Optional[Problem]:
         """Pick a curated DSA problem from the database"""
         return await self.problem_repo.get_random_by_criteria(
-            path="pirate",
+            path="fighter",
             difficulty=difficulty,
             exclude_solved_by=user_id,
         )
@@ -46,23 +46,19 @@ class ProblemService:
         self, user_id: str, difficulty: str
     ) -> Optional[Problem]:
         """Generate a system design problem via LLM, fall back to database"""
-        # Get user's weak areas for targeted generation
         weak_areas = await self.rag_service.get_weak_areas(user_id)
 
-        # Try LLM generation first
         generated = await self.question_generator.generate_system_design_problem(
             difficulty=difficulty,
             weak_areas=weak_areas,
         )
 
         if generated:
-            # Save to DB so we can reference it for submissions/scoring
             saved = await self.problem_repo.create(generated)
             return saved
 
-        # Fall back to curated database if LLM fails
         return await self.problem_repo.get_random_by_criteria(
-            path="marine",
+            path="sentinel",
             difficulty=difficulty,
             exclude_solved_by=user_id,
         )
@@ -78,8 +74,7 @@ class ProblemService:
         category: Optional[str] = None,
     ) -> Optional[Problem]:
         """Get a random problem with optional filters"""
-        if path == "marine" and category:
-            # Try LLM generation for marine with specific category
+        if path == "sentinel" and category:
             generated = await self.question_generator.generate_system_design_problem(
                 difficulty=difficulty or "medium",
                 category=category,
@@ -96,7 +91,7 @@ class ProblemService:
 
     async def get_categories(self, path: str) -> dict:
         """Get problem categories for a path"""
-        if path == "pirate":
+        if path == "fighter":
             return {"categories": DSA_CATEGORIES}
         return {"categories": SYSTEM_DESIGN_CATEGORIES}
 

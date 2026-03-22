@@ -20,8 +20,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Grand Line Coder API",
-    description="One Piece themed DSA/System Design platform",
+    title="CodeArena API",
+    description="Gamified DSA/System Design mastery platform",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -41,4 +41,4 @@ app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "message": "The Grand Line awaits!"}
+    return {"status": "healthy", "message": "The arena awaits!"}

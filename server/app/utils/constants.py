@@ -1,128 +1,112 @@
-PIRATE_RANKS = [
+FIGHTER_RANKS = [
     {
-        "name": "Rookie",
-        "bounty": "₿0",
+        "name": "Novice",
+        "rating": "0",
         "min_points": 0,
-        "icon": "🏴‍☠️",
+        "icon": "🥊",
         "color": "#4a5568",
-        "quote": "Every pirate starts somewhere. Set sail!",
+        "quote": "Every fighter starts somewhere. Step into the arena!",
     },
     {
-        "name": "Super Rookie",
-        "bounty": "₿100M",
+        "name": "Brawler",
+        "rating": "100",
         "min_points": 100,
         "icon": "⚔️",
         "color": "#2d3748",
-        "quote": "You're making waves across the Grand Line!",
+        "quote": "You're making a name for yourself in the arena!",
     },
     {
-        "name": "Supernova",
-        "bounty": "₿300M",
+        "name": "Striker",
+        "rating": "300",
         "min_points": 200,
         "icon": "💫",
         "color": "#553c9a",
-        "quote": "The Worst Generation acknowledges your strength!",
+        "quote": "Your strikes land with precision and power!",
     },
     {
-        "name": "Yonko Commander",
-        "bounty": "₿1B",
+        "name": "Gladiator",
+        "rating": "1000",
         "min_points": 300,
         "icon": "🔥",
         "color": "#c53030",
-        "quote": "You stand at the right hand of an Emperor!",
+        "quote": "The colosseum roars your name!",
     },
     {
-        "name": "Yonko",
-        "bounty": "₿3B",
+        "name": "Champion",
+        "rating": "3000",
         "min_points": 400,
         "icon": "👑",
         "color": "#d69e2e",
-        "quote": "The seas tremble at your name, Emperor!",
+        "quote": "Few have ever reached this level of mastery!",
     },
     {
-        "name": "Pirate King",
-        "bounty": "₿5B",
+        "name": "Grandmaster",
+        "rating": "5000",
         "min_points": 500,
-        "icon": "🏴‍☠️👑",
+        "icon": "🏆",
         "color": "#744210",
-        "quote": "You've conquered the Grand Line! But one more peak remains...",
+        "quote": "You've conquered the arena! But one more peak remains...",
     },
     {
-        "name": "GOL D. ROGER",
-        "bounty": "₿∞",
+        "name": "LEGEND",
+        "rating": "∞",
         "min_points": 600,
-        "icon": "👒",
+        "icon": "🌟",
         "color": "#1a202c",
         "is_supreme": True,
-        "quote": "My wealth and treasures? If you want it, I'll let you have it. Look for it; I left it all at that place!",
+        "quote": "Algorithms bend to your will. You are the stuff of legend.",
     },
 ]
 
-MARINE_RANKS = [
+SENTINEL_RANKS = [
     {
-        "name": "Ensign",
-        "title": "Junior Officer",
+        "name": "Guardian",
+        "title": "Defender",
         "min_points": 0,
-        "icon": "⚓",
-        "color": "#2b6cb0",
-        "quote": "Welcome to the Marines, soldier!",
-    },
-    {
-        "name": "Lieutenant",
-        "title": "Field Officer",
-        "min_points": 100,
-        "icon": "🎖️",
-        "color": "#2c5282",
-        "quote": "You're leading teams now. Design with purpose!",
-    },
-    {
-        "name": "Captain",
-        "title": "Ship Commander",
-        "min_points": 200,
-        "icon": "⚓🚢",
+        "icon": "⚙️",
         "color": "#1a365d",
-        "quote": "A ship is only as good as its architecture. Build well!",
+        "quote": "You're building systems that stand the test of time!",
     },
     {
-        "name": "Rear Admiral",
-        "title": "Fleet Officer",
-        "min_points": 300,
-        "icon": "🌟",
+        "name": "Warden",
+        "title": "Strategist",
+        "min_points": 100,
+        "icon": "🏗️",
         "color": "#234e52",
-        "quote": "Strategic thinking is your weapon now!",
+        "quote": "Strategic thinking is your greatest weapon!",
     },
     {
-        "name": "Vice Admiral",
-        "title": "HQ Elite",
-        "min_points": 400,
-        "icon": "⭐⭐",
+        "name": "Protector",
+        "title": "Architect",
+        "min_points": 200,
+        "icon": "⭐",
         "color": "#285e61",
-        "quote": "The World Government relies on your designs!",
+        "quote": "Your designs shield systems from chaos!",
     },
     {
-        "name": "Admiral",
-        "title": "World Power",
-        "min_points": 500,
-        "icon": "🌊",
+        "name": "Sovereign",
+        "title": "Master Builder",
+        "min_points": 300,
+        "icon": "🏛️",
         "color": "#1a202c",
-        "quote": "You shape the system itself. Few reach this height!",
+        "quote": "You shape the infrastructure itself. Few reach this height!",
     },
     {
-        "name": "Fleet Admiral",
+        "name": "Architect Supreme",
         "title": "Supreme Commander",
-        "min_points": 600,
-        "icon": "⚓👑",
+        "min_points": 400,
+        "icon": "🔱",
         "color": "#171923",
-        "quote": "The entire Navy answers to your architecture!",
+        "quote": "Entire systems answer to your architecture!",
     },
     {
-        "name": "MONKEY D. GARP",
-        "title": "The Hero",
-        "min_points": 700,
-        "icon": "🦸",
+        "name": "ORACLE",
+        "title": "The Visionary",
+        "min_points": 500,
+        "icon": "🔮",
         "color": "#000000",
         "is_supreme": True,
-        "quote": "I have no intention of letting the system fail. But I'm not going to stop improving it either!",
+        "quote": "You see the system whole — past, present, and future. True mastery.",
     },
 ]
 
@@ -137,8 +121,8 @@ SCORING = {
 
 # Supreme Rank Qualification Requirements
 SUPREME_RANK_REQUIREMENTS = {
-    "pirate": {
-        "rank_name": "GOL D. ROGER",
+    "fighter": {
+        "rank_name": "LEGEND",
         "min_points": 600,
         "min_first_try_rate": 0.80,
         "min_expert_solved": 10,
@@ -157,9 +141,9 @@ SUPREME_RANK_REQUIREMENTS = {
             "bit_manipulation",
         ],
     },
-    "marine": {
-        "rank_name": "MONKEY D. GARP",
-        "min_points": 700,
+    "sentinel": {
+        "rank_name": "ORACLE",
+        "min_points": 500,
         "min_first_try_rate": 0.75,
         "min_avg_ai_score": 0.85,
         "min_lld_solved": 10,
@@ -168,7 +152,7 @@ SUPREME_RANK_REQUIREMENTS = {
     },
 }
 
-# DSA Categories for Pirate path
+# DSA Categories for Fighter path
 DSA_CATEGORIES = [
     "arrays",
     "strings",
@@ -182,7 +166,7 @@ DSA_CATEGORIES = [
     "bit_manipulation",
 ]
 
-# System Design Categories for Marine path
+# System Design Categories for Sentinel path
 SYSTEM_DESIGN_CATEGORIES = {
     "lld": [
         "oop_design",
@@ -203,7 +187,7 @@ SYSTEM_DESIGN_CATEGORIES = {
 
 # Difficulty mappings based on rank
 RANK_DIFFICULTY_MAP = {
-    "pirate": {
+    "fighter": {
         0: ["easy"],
         1: ["easy", "medium"],
         2: ["medium"],
@@ -212,14 +196,12 @@ RANK_DIFFICULTY_MAP = {
         5: ["hard", "expert"],
         6: ["expert"],
     },
-    "marine": {
+    "sentinel": {
         0: ["easy"],
-        1: ["easy", "medium"],
-        2: ["medium"],
-        3: ["medium", "hard"],
-        4: ["hard"],
-        5: ["hard", "expert"],
-        6: ["expert"],
-        7: ["expert"],
+        1: ["medium"],
+        2: ["medium", "hard"],
+        3: ["hard"],
+        4: ["hard", "expert"],
+        5: ["expert"],
     },
 }

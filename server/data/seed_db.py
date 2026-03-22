@@ -22,7 +22,7 @@ async def seed_problems():
                 problems = json.load(f)
                 if problems:
                     for p in problems:
-                        p["path"] = "pirate"
+                        p["path"] = "fighter"
                         p["difficulty"] = difficulty
                     await db.problems.insert_many(problems)
                     print(f"Seeded {len(problems)} {difficulty} DSA problems")
@@ -35,7 +35,7 @@ async def seed_problems():
                 problems = json.load(f)
                 if problems:
                     for p in problems:
-                        p["path"] = "marine"
+                        p["path"] = "sentinel"
                         p["category"] = category
                     await db.problems.insert_many(problems)
                     print(f"Seeded {len(problems)} {category} problems")

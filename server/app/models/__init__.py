@@ -9,3 +9,4 @@ __all__ = [
     "Submission", "TestResult", "CriteriaScore", "AIEvaluation",
     "UserProgress", "CategoryPerformance", "RecentSubmission",
 ]
+

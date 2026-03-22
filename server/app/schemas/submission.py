@@ -10,7 +10,7 @@ class SubmissionCreate(BaseModel):
     problem_id: str
     code: str
     language: str
-    path: str  # 'pirate' | 'marine'
+    path: str  # 'fighter' | 'sentinel'
 
 
 class SubmissionResponse(BaseModel):

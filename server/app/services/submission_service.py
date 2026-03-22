@@ -59,13 +59,13 @@ class SubmissionService:
             await self.submission_repo.update(submission_id, {"status": "error"})
             return
 
-        if submission.path == "pirate":
+        if submission.path == "fighter":
             await self._process_dsa_submission(submission, problem)
         else:
             await self._process_design_submission(submission, problem)
 
     async def _process_dsa_submission(self, submission: Submission, problem):
-        """Process DSA (pirate) submission with code execution"""
+        """Process DSA (fighter) submission with code execution"""
         try:
             results = await self.code_executor.execute(
                 code=submission.code,
@@ -99,7 +99,7 @@ class SubmissionService:
             await self.submission_repo.update(submission.id, {"status": "error"})
 
     async def _process_design_submission(self, submission: Submission, problem):
-        """Process system design (marine) submission with AI evaluation"""
+        """Process system design (sentinel) submission with AI evaluation"""
         try:
             evaluation = await self.ai_judge.evaluate_system_design(
                 problem_id=submission.problem_id,

@@ -25,19 +25,19 @@ class UserService:
             return None
 
         total_solved = (
-            user.pirate_progress.problems_solved + user.marine_progress.problems_solved
+            user.fighter_progress.problems_solved + user.sentinel_progress.problems_solved
         )
 
         return UserStatsResponse(
             total_problems_solved=total_solved,
-            pirate_progress=user.pirate_progress,
-            marine_progress=user.marine_progress,
+            fighter_progress=user.fighter_progress,
+            sentinel_progress=user.sentinel_progress,
             current_streak=max(
-                user.pirate_progress.current_streak,
-                user.marine_progress.current_streak,
+                user.fighter_progress.current_streak,
+                user.sentinel_progress.current_streak,
             ),
             best_streak=max(
-                user.pirate_progress.best_streak, user.marine_progress.best_streak
+                user.fighter_progress.best_streak, user.sentinel_progress.best_streak
             ),
             achievements_count=len(user.achievements),
         )

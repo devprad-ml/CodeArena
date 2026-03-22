@@ -10,7 +10,7 @@ router = APIRouter(prefix="/problems", tags=["Problems"])
 
 @router.get("/next", response_model=ProblemResponse)
 async def get_next_problem(
-    path: str = Query(..., regex="^(pirate|marine)$"),
+    path: str = Query(..., regex="^(fighter|sentinel)$"),
     current_user: User = Depends(get_current_user),
 ):
     """Get next problem (AI-adjusted difficulty)"""
@@ -20,7 +20,7 @@ async def get_next_problem(
 
 @router.get("/categories")
 async def get_categories(
-    path: str = Query(..., regex="^(pirate|marine)$"),
+    path: str = Query(..., regex="^(fighter|sentinel)$"),
 ):
     """List problem categories"""
     problem_service = ProblemService()
@@ -29,7 +29,7 @@ async def get_categories(
 
 @router.get("/random", response_model=ProblemResponse)
 async def get_random_problem(
-    path: str = Query(..., regex="^(pirate|marine)$"),
+    path: str = Query(..., regex="^(fighter|sentinel)$"),
     difficulty: str = Query(None),
     category: str = Query(None),
     current_user: User = Depends(get_current_user),

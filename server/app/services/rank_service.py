@@ -2,8 +2,8 @@ from typing import Tuple, Dict, List
 
 from app.db.repositories.user_repo import UserRepository
 from app.utils.constants import (
-    PIRATE_RANKS,
-    MARINE_RANKS,
+    FIGHTER_RANKS,
+    SENTINEL_RANKS,
     SUPREME_RANK_REQUIREMENTS,
     DSA_CATEGORIES,
     SCORING,
@@ -92,13 +92,13 @@ class RankService:
         user_stats: Dict,
     ) -> Tuple[bool, Dict]:
         """
-        Check if user qualifies for supreme rank (GOL D. ROGER or MONKEY D. GARP).
+        Check if user qualifies for supreme rank (LEGEND or ORACLE).
         Supreme ranks cannot be achieved by grinding alone.
         """
         requirements = SUPREME_RANK_REQUIREMENTS[path]
         qualification_status = {}
 
-        if path == "pirate":
+        if path == "fighter":
             checks = {
                 "points": user_stats.get("total_points", 0) >= requirements["min_points"],
                 "first_try_rate": user_stats.get("first_try_rate", 0)
@@ -141,7 +141,7 @@ class RankService:
                 },
             }
 
-        else:  # marine
+        else:  # sentinel
             checks = {
                 "points": user_stats.get("total_points", 0) >= requirements["min_points"],
                 "first_try_rate": user_stats.get("first_try_rate", 0)
@@ -210,7 +210,7 @@ class RankService:
         self, path: str, total_points: int, user_stats: Dict = None
     ) -> dict:
         """Get current rank info based on total points."""
-        ranks = PIRATE_RANKS if path == "pirate" else MARINE_RANKS
+        ranks = FIGHTER_RANKS if path == "fighter" else SENTINEL_RANKS
 
         base_rank_index = min(total_points // self.POINTS_PER_RANK, len(ranks) - 1)
 
@@ -241,7 +241,7 @@ class RankService:
         result = {
             "rank_index": rank_index,
             "rank_name": current_rank["name"],
-            "rank_title": current_rank.get("bounty") or current_rank.get("title"),
+            "rank_title": current_rank.get("rating") or current_rank.get("title"),
             "points_in_rank": points_in_rank,
             "points_to_next": points_to_next,
             "next_rank": next_rank["name"] if next_rank else None,
@@ -266,7 +266,7 @@ class RankService:
         new_rank_info = self.get_rank_info(path, new_points, user_stats)
 
         if new_rank_info["rank_index"] > old_rank_info["rank_index"]:
-            ranks = PIRATE_RANKS if path == "pirate" else MARINE_RANKS
+            ranks = FIGHTER_RANKS if path == "fighter" else SENTINEL_RANKS
             new_rank_data = ranks[new_rank_info["rank_index"]]
 
             return True, {
