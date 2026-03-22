@@ -1,0 +1,9 @@
+[project]
+name = "grand-line-coder-server"
+version = "1.0.0"
+description = "One Piece themed DSA/System Design platform - Backend"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
