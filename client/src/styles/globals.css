@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-gray-950 text-gray-100 font-sans antialiased;
+    margin: 0;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+  }
+}
+
+@layer components {
+  .btn-fighter {
+    @apply bg-fighter-primary hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 border border-fighter-border;
+  }
+
+  .btn-sentinel {
+    @apply bg-sentinel-primary hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 border border-sentinel-border;
+  }
+
+  .card-fighter {
+    @apply bg-fighter-surface border border-fighter-border rounded-xl p-4;
+  }
+
+  .card-sentinel {
+    @apply bg-sentinel-surface border border-sentinel-border rounded-xl p-4;
+  }
+
+  .glow-fighter {
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.4);
+  }
+
+  .glow-sentinel {
+    box-shadow: 0 0 15px rgba(0, 119, 182, 0.4);
+  }
+}
