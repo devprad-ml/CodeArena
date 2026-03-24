@@ -7,6 +7,7 @@ from app.models.submission import Submission
 from app.services.code_executor import CodeExecutor
 from app.services.rank_service import RankService
 from app.services.ai_judge import AIJudge
+from app.core.ws_manager import ws_manager
 
 
 class SubmissionService:
@@ -51,12 +52,14 @@ class SubmissionService:
         if not submission:
             return
 
-        # Update status to running
+        # Update status to running and notify clients
         await self.submission_repo.update(submission_id, {"status": "running"})
+        await ws_manager.broadcast(submission_id, {"event": "status", "status": "running"})
 
         problem = await self.problem_repo.get_by_id(submission.problem_id)
         if not problem:
             await self.submission_repo.update(submission_id, {"status": "error"})
+            await ws_manager.broadcast(submission_id, {"event": "error", "message": "Problem not found."})
             return
 
         if submission.path == "fighter":
@@ -81,11 +84,12 @@ class SubmissionService:
                 attempt_number=submission.attempt_number,
             )
 
+            test_results_data = [r.model_dump() for r in results.test_results]
             await self.submission_repo.update(
                 submission.id,
                 {
                     "status": status,
-                    "test_results": [r.model_dump() for r in results.test_results],
+                    "test_results": test_results_data,
                     "points_awarded": points,
                 },
             )
@@ -95,8 +99,21 @@ class SubmissionService:
                     submission.user_id, submission.path, points, submission.attempt_number
                 )
 
-        except Exception:
+            await ws_manager.broadcast(
+                submission.id,
+                {
+                    "event": "result",
+                    "status": status,
+                    "points_awarded": points,
+                    "test_results": test_results_data,
+                    "stdout": results.stdout if hasattr(results, "stdout") else "",
+                    "stderr": results.stderr if hasattr(results, "stderr") else "",
+                },
+            )
+
+        except Exception as e:
             await self.submission_repo.update(submission.id, {"status": "error"})
+            await ws_manager.broadcast(submission.id, {"event": "error", "message": str(e)})
 
     async def _process_design_submission(self, submission: Submission, problem):
         """Process system design (sentinel) submission with AI evaluation"""
@@ -115,17 +132,16 @@ class SubmissionService:
                 attempt_number=submission.attempt_number,
             )
 
+            ai_eval_data = {
+                "score": evaluation.overall_score,
+                "feedback": evaluation.feedback,
+                "criteria_scores": [s.model_dump() for s in evaluation.criteria_scores],
+            }
             await self.submission_repo.update(
                 submission.id,
                 {
                     "status": status,
-                    "ai_evaluation": {
-                        "score": evaluation.overall_score,
-                        "feedback": evaluation.feedback,
-                        "criteria_scores": [
-                            s.model_dump() for s in evaluation.criteria_scores
-                        ],
-                    },
+                    "ai_evaluation": ai_eval_data,
                     "points_awarded": points,
                 },
             )
@@ -135,5 +151,16 @@ class SubmissionService:
                     submission.user_id, submission.path, points, submission.attempt_number
                 )
 
-        except Exception:
+            await ws_manager.broadcast(
+                submission.id,
+                {
+                    "event": "result",
+                    "status": status,
+                    "points_awarded": points,
+                    "ai_evaluation": ai_eval_data,
+                },
+            )
+
+        except Exception as e:
             await self.submission_repo.update(submission.id, {"status": "error"})
+            await ws_manager.broadcast(submission.id, {"event": "error", "message": str(e)})

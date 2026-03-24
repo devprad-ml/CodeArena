@@ -1,1 +1,199 @@
-[]
+[
+  {
+    "title": "Design a Parking Lot System",
+    "slug": "design-parking-lot",
+    "description": "Design an object-oriented system for a multi-level parking lot.\n\n**Requirements:**\n- The parking lot has multiple floors, each with multiple spots\n- Spot types: Motorcycle, Compact, Large\n- Vehicles: Motorcycle (fits any), Car (Compact/Large), Truck (Large only)\n- Track available spots per floor and type\n- Support: `park(vehicle)` → assigns a spot, `leave(ticket)` → frees the spot\n- Generate a ticket with entry time when parking\n- Calculate fee on exit (e.g., $2/hr for Compact, $3/hr for Large)\n\n**Constraints:**\n- Multiple entrances and exits\n- Support for full/available status per floor\n- Thread-safe spot assignment\n\n**Follow-ups to consider:**\n- How would you handle VIP reserved spots?\n- How would you support monthly passes?\n- How would you add electric vehicle charging spots?",
+    "difficulty": "easy",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "class_design", "weight": 0.30},
+      {"criterion": "encapsulation", "weight": 0.20},
+      {"criterion": "relationships", "weight": 0.20},
+      {"criterion": "edge_cases", "weight": 0.15},
+      {"criterion": "extensibility", "weight": 0.15}
+    ],
+    "constraints": "- Support at least 3 vehicle types and 3 spot types\n- Ticket generation and fee calculation required\n- Must handle full parking lot gracefully",
+    "hints": [
+      "Start with your core entities: ParkingLot, Floor, ParkingSpot, Vehicle, Ticket.",
+      "Use inheritance for vehicle types and spot types — a common base class keeps the design clean.",
+      "Think about where the 'find available spot' logic lives — the ParkingLot or a separate service?"
+    ],
+    "solution": "## Model Answer\n\n### Core Classes\n\n**Vehicle hierarchy:** `Vehicle` → `Motorcycle`, `Car`, `Truck`. Each has a `VehicleType` enum.\n\n**ParkingSpot:** Has `SpotType` (MOTORCYCLE/COMPACT/LARGE), `is_occupied`, `vehicle`. Method `can_fit(vehicle)` checks type compatibility.\n\n**Floor:** Contains list of `ParkingSpot`. Methods: `get_available_spot(vehicle_type)`, `is_full()`.\n\n**ParkingLot:** Singleton. Contains list of `Floor`. Methods: `park(vehicle) -> Ticket`, `leave(ticket) -> float (fee)`.\n\n**Ticket:** `ticket_id`, `spot`, `vehicle`, `entry_time`.\n\n### Key Design Decisions\n- **Strategy Pattern** for fee calculation — easy to swap pricing models\n- **Observer Pattern** for notifying availability displays at entrances\n- Use `threading.Lock` per spot for thread safety\n\n### Spot Compatibility Matrix\n| Vehicle | Motorcycle Spot | Compact Spot | Large Spot |\n|---------|----------------|--------------|------------|\n| Motorcycle | ✓ | ✓ | ✓ |\n| Car | ✗ | ✓ | ✓ |\n| Truck | ✗ | ✗ | ✓ |",
+    "starter_code": {"text": "## Parking Lot Design\n\n### Requirements\n- Functional requirements:\n- Non-functional requirements:\n\n### Core Classes & Relationships\n\n```\nClass diagram here\n```\n\n### Key Methods\n\n### Fee Calculation\n\n### Concurrency Handling\n\n### Edge Cases\n"},
+    "tags": ["oop-design", "design-patterns", "class-diagrams"],
+    "companies": ["Amazon", "Microsoft", "Google", "Uber", "Bloomberg"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design an LRU Cache",
+    "slug": "design-lru-cache",
+    "description": "Design a data structure that implements a Least Recently Used (LRU) cache.\n\n**Requirements:**\n- `LRUCache(capacity)`: Initialize with positive capacity\n- `get(key) -> value`: Return value if key exists, else return -1. This counts as a use.\n- `put(key, value)`: Insert or update key-value. If at capacity, evict the least recently used key first.\n\nBoth operations must run in **O(1)** average time.\n\n**Example:**\n```\nLRUCache(2)\nput(1, 1)  → cache: {1:1}\nput(2, 2)  → cache: {1:1, 2:2}\nget(1)     → 1, cache: {2:2, 1:1}  (1 is now MRU)\nput(3, 3)  → evict 2, cache: {1:1, 3:3}\nget(2)     → -1 (not found)\n```\n\n**Follow-ups:**\n- How would you support TTL (time-to-live) expiry?\n- How would you make this distributed across multiple nodes?",
+    "difficulty": "easy",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "data_structure_choice", "weight": 0.30},
+      {"criterion": "time_complexity", "weight": 0.30},
+      {"criterion": "implementation_correctness", "weight": 0.25},
+      {"criterion": "edge_cases", "weight": 0.15}
+    ],
+    "constraints": "- 1 <= capacity <= 3000\n- Both get and put must be O(1)\n- LRU means the item that was accessed/inserted least recently gets evicted",
+    "hints": [
+      "O(1) get suggests a hash map. But how do you maintain order efficiently?",
+      "A doubly linked list maintains insertion/access order — moving a node to the front is O(1).",
+      "Combine a hash map (key → node) with a doubly linked list to get O(1) for both operations."
+    ],
+    "solution": "## Model Answer\n\n### Data Structures\n**HashMap + Doubly Linked List** — the classic combination.\n\n- **HashMap:** `key → ListNode` for O(1) lookup\n- **Doubly Linked List:** maintains access order (head = MRU, tail = LRU)\n- Sentinel head/tail nodes avoid edge case handling\n\n### Operations\n**get(key):**\n1. If key not in map: return -1\n2. Move node to head (mark as recently used)\n3. Return node.value\n\n**put(key, value):**\n1. If key exists: update value, move to head\n2. Else: create new node, add to head, add to map\n3. If size > capacity: remove tail node, remove from map\n\n### Implementation Note\nIn Python, `collections.OrderedDict` provides this natively via `move_to_end()`. In interviews, implement from scratch to demonstrate understanding.\n\n**Time:** O(1) both | **Space:** O(capacity)",
+    "starter_code": {"text": "## LRU Cache Design\n\n### Data Structures Chosen\n\n### Class Design\n\n```\nclass LRUCache:\n    def __init__(self, capacity):\n        pass\n    \n    def get(self, key):\n        pass\n    \n    def put(self, key, value):\n        pass\n```\n\n### Why This Achieves O(1)\n\n### Edge Cases\n"},
+    "tags": ["design-patterns", "data-structures", "hash-table", "linked-list"],
+    "companies": ["Amazon", "Facebook", "Google", "Microsoft", "Uber"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Library Management System",
+    "slug": "design-library-management",
+    "description": "Design an object-oriented system for a public library.\n\n**Requirements:**\n- Catalog: Books (ISBN, title, author, copies), Magazines, DVDs\n- Members: Registration, membership expiry, borrowing history\n- Borrowing: Check out items (14-day default), return, renew\n- Fines: $0.25/day overdue, blocked from borrowing if fine > $10\n- Search: By title, author, ISBN, subject\n- Reservations: Queue for unavailable items — notify when available\n\n**Scale:**\n- 50,000 books, 5,000 active members, 200 concurrent users\n\n**Follow-ups:**\n- How would you handle a branch library network?\n- How would you add e-book support (digital lending)?",
+    "difficulty": "medium",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "class_design", "weight": 0.25},
+      {"criterion": "relationships", "weight": 0.25},
+      {"criterion": "business_logic", "weight": 0.25},
+      {"criterion": "database_schema", "weight": 0.15},
+      {"criterion": "edge_cases", "weight": 0.10}
+    ],
+    "constraints": "- A member can borrow up to 5 items at once\n- Overdue fines must be paid before new borrows\n- Reservations are FIFO per item",
+    "hints": [
+      "Separate the catalog item (Book as a concept) from its physical copies (BookItem). One ISBN can have multiple physical copies.",
+      "A Lending record is a separate entity connecting Member, BookItem, and dates — don't embed this in either class.",
+      "The reservation queue and fine calculation are good candidates for dedicated service classes."
+    ],
+    "solution": "## Model Answer\n\n### Key Distinction: Book vs BookItem\n`Book` — represents a title (ISBN, title, author, subject). Can have many physical copies.\n`BookItem` — a physical copy (barcode, shelf location, condition, status: AVAILABLE/BORROWED/RESERVED).\n\n### Core Classes\n- **Catalog:** `search_by_title()`, `search_by_author()`, `search_by_isbn()`\n- **Member:** `member_id`, `name`, `active_loans: List[Lending]`, `fines: float`, `can_borrow() -> bool`\n- **Lending:** `lending_id`, `member`, `book_item`, `issued_date`, `due_date`, `returned_date`\n- **Reservation:** FIFO queue per BookItem; triggers notification when item returned\n- **FineCalculator:** Calculates overdue charges; `get_fine(lending) -> float`\n- **LibrarySystem:** Orchestrates checkout/return/renewal flows\n\n### Database Schema\n```\nbooks(isbn, title, author, subject)\nbook_items(barcode, isbn, status, location)\nmembers(member_id, name, email, expiry)\nlendings(id, member_id, barcode, issued, due, returned)\nfines(id, lending_id, amount, paid)\nreservations(id, member_id, isbn, queued_at)\n```",
+    "starter_code": {"text": "## Library Management System Design\n\n### Requirements\n- Functional:\n- Non-functional:\n\n### Core Classes\n\n### Relationships & Cardinalities\n\n### Database Schema\n\n### Business Logic: Checkout Flow\n\n### Edge Cases\n"},
+    "tags": ["oop-design", "database-schema", "class-diagrams"],
+    "companies": ["Amazon", "Microsoft", "Bloomberg", "Palantir"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Chess Game",
+    "slug": "design-chess-game",
+    "description": "Design an object-oriented system to represent and play a game of Chess.\n\n**Requirements:**\n- Full 8x8 board with all piece types: King, Queen, Rook, Bishop, Knight, Pawn\n- Support move validation for each piece type\n- Detect check, checkmate, and stalemate\n- Handle special moves: castling, en passant, pawn promotion\n- Track game state: whose turn, move history, captured pieces\n- Support both human vs human and human vs AI\n\n**Follow-ups:**\n- How would you implement an AI player (minimax/alpha-beta pruning)?\n- How would you store and replay a game using algebraic notation?",
+    "difficulty": "medium",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "class_hierarchy", "weight": 0.30},
+      {"criterion": "move_validation", "weight": 0.25},
+      {"criterion": "game_state_management", "weight": 0.25},
+      {"criterion": "design_patterns_used", "weight": 0.20}
+    ],
+    "constraints": "- All 6 piece types must have correct move validation\n- Check detection is mandatory\n- Special moves (castling, en passant) are a bonus",
+    "hints": [
+      "Use an abstract `Piece` base class with an abstract `get_valid_moves(board)` method — each piece implements its own logic.",
+      "The `Board` class holds the 8x8 grid and handles move execution. Separate move validation from the pieces themselves.",
+      "Check detection: after any move, see if the moving player's king is under attack. Use a method like `is_under_attack(square, by_color)`."
+    ],
+    "solution": "## Model Answer\n\n### Class Hierarchy\n```\nPiece (abstract)\n  ├── King\n  ├── Queen  \n  ├── Rook\n  ├── Bishop\n  ├── Knight\n  └── Pawn\n```\n\n### Key Classes\n- **Board:** 8x8 grid, `move(from, to)`, `is_in_check(color)`, `get_piece(position)`\n- **Piece:** `color`, `position`, `has_moved` (for castling), abstract `get_valid_moves(board)`\n- **Game:** `current_turn`, `move_history`, `status` (ACTIVE/CHECK/CHECKMATE/STALEMATE), `make_move(from, to)`\n- **Move:** `from_pos`, `to_pos`, `piece`, `captured_piece`, `is_castling`, `is_en_passant`\n- **Player:** Abstract → `HumanPlayer`, `AIPlayer`\n\n### Design Patterns\n- **Strategy:** Swap AI algorithms without changing Game\n- **Command:** Move objects support undo/redo\n- **Observer:** Notify UI of board state changes\n\n### Check Detection\nAfter each move, call `is_in_check(current_player_color)`. If true and no valid moves exist → Checkmate.",
+    "starter_code": {"text": "## Chess Game Design\n\n### Class Hierarchy\n\n### Board Representation\n\n### Move Validation (by piece type)\n\n### Check / Checkmate Detection\n\n### Special Moves\n\n### Design Patterns Used\n"},
+    "tags": ["oop-design", "design-patterns", "class-hierarchy"],
+    "companies": ["Amazon", "Google", "Palantir", "Uber"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Hotel Booking System",
+    "slug": "design-hotel-booking",
+    "description": "Design an object-oriented system for hotel room reservations.\n\n**Requirements:**\n- Room types: Single, Double, Suite with different pricing\n- Search: Available rooms by date range, type, amenities\n- Booking: Reserve a room, confirm/cancel, modify dates\n- Pricing: Dynamic — base rate + seasonal multiplier + discount codes\n- Payment: Support credit card, pay at checkout\n- Notifications: Booking confirmation, reminders, cancellation\n\n**Scale:**\n- 500 rooms per hotel, 10,000 bookings/day\n- Overbooking prevention is critical\n\n**Follow-ups:**\n- How would you handle a hotel chain with 1000 properties?\n- How would you prevent double-booking under high concurrency?",
+    "difficulty": "medium",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "class_design", "weight": 0.25},
+      {"criterion": "concurrency_handling", "weight": 0.25},
+      {"criterion": "business_rules", "weight": 0.25},
+      {"criterion": "api_design", "weight": 0.15},
+      {"criterion": "edge_cases", "weight": 0.10}
+    ],
+    "constraints": "- No double-booking under concurrent requests\n- Cancellation policy: free within 24h, 50% fee otherwise\n- Booking must be held for 15 minutes after search before confirmed",
+    "hints": [
+      "Separate Room (physical) from RoomType (category with pricing) — one type has many rooms.",
+      "A Booking has states: PENDING → CONFIRMED → CHECKED_IN → CHECKED_OUT / CANCELLED.",
+      "For concurrent booking prevention, use optimistic locking or database-level row locking on the Room record."
+    ],
+    "solution": "## Model Answer\n\n### Core Classes\n- **Hotel:** `hotel_id`, `name`, `rooms: List[Room]`, `search_available(start, end, type)`\n- **RoomType:** `type_name`, `base_rate`, `max_guests`, `amenities`\n- **Room:** `room_number`, `floor`, `room_type`, `status` (AVAILABLE/OCCUPIED/MAINTENANCE)\n- **Booking:** `booking_id`, `guest`, `room`, `check_in`, `check_out`, `status`, `total_price`\n- **Guest:** `guest_id`, `name`, `email`, `loyalty_tier`\n- **PricingEngine:** `calculate(room_type, dates, discount_code) -> float`\n- **PaymentProcessor:** Interface → `CreditCardProcessor`, `PayAtCheckoutProcessor`\n\n### Concurrency: Double-Booking Prevention\n```sql\nSELECT * FROM rooms\nWHERE room_id = ? AND NOT EXISTS (\n    SELECT 1 FROM bookings\n    WHERE room_id = ? AND status != 'CANCELLED'\n    AND check_in < ? AND check_out > ?\n)\nFOR UPDATE;  -- row-level lock\n```\nOr use optimistic locking with a `version` column.\n\n### Booking Flow\n1. Search → temporary hold (15 min TTL in Redis)\n2. Guest confirms → create Booking record, charge payment\n3. Release hold if TTL expires without confirmation",
+    "starter_code": {"text": "## Hotel Booking System Design\n\n### Requirements\n\n### Core Classes\n\n### Booking State Machine\n\n### Concurrency: Preventing Double Booking\n\n### Pricing Model\n\n### API Endpoints\n"},
+    "tags": ["oop-design", "concurrency", "state-machine"],
+    "companies": ["Booking.com", "Airbnb", "Expedia", "Amazon"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Vending Machine",
+    "slug": "design-vending-machine",
+    "description": "Design an object-oriented system for a vending machine.\n\n**Requirements:**\n- Inventory: Items with price, quantity, item slot (A1, A2, etc.)\n- Payment: Accept coins/bills, return change\n- States: IDLE → HAS_MONEY → ITEM_SELECTED → DISPENSING → RETURNING_CHANGE\n- Operations: insert_money, select_item, cancel, collect_item, collect_change\n- Admin: restock items, collect cash, update prices\n\n**Constraints:**\n- Machine should never dispense an item without full payment\n- Change must be returned if insufficient change available, block the transaction\n\n**Follow-ups:**\n- How would you add credit card support?\n- How would you add a display showing real-time availability?",
+    "difficulty": "medium",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "state_machine_design", "weight": 0.30},
+      {"criterion": "class_design", "weight": 0.25},
+      {"criterion": "payment_handling", "weight": 0.25},
+      {"criterion": "error_handling", "weight": 0.20}
+    ],
+    "constraints": "- All state transitions must be explicit and validated\n- Change calculation must be exact (greedy algorithm)\n- Insufficient stock or change must fail gracefully",
+    "hints": [
+      "Model this as a finite state machine — the State pattern is ideal here.",
+      "Create a State interface with methods like `insert_money()`, `select_item()`, `dispense()`. Each state implements only valid operations.",
+      "A CoinInventory class tracks available denominations for change calculation."
+    ],
+    "solution": "## Model Answer\n\n### State Machine\n```\nIDLE ──insert_money──► HAS_MONEY ──select_item──► ITEM_SELECTED\n                          │                              │\n                        cancel                       dispense\n                          │                              │\n                    RETURNING_CHANGE ◄─────── DISPENSING\n```\n\n### State Pattern Implementation\n```python\nclass State(ABC):\n    @abstractmethod\n    def insert_money(self, amount): pass\n    @abstractmethod  \n    def select_item(self, slot): pass\n    @abstractmethod\n    def cancel(self): pass\n\nclass IdleState(State):\n    def insert_money(self, amount):\n        self.machine.current_amount = amount\n        self.machine.state = self.machine.has_money_state\n    def select_item(self, slot):\n        raise InvalidOperationError('Insert money first')\n```\n\n### Core Classes\n- **VendingMachine:** Holds all state objects, `current_state`, `current_amount`, `inventory`\n- **Item:** `name`, `price`, `quantity`\n- **Inventory:** `Dict[slot, Item]`, `get_item(slot)`, `restock(slot, quantity)`\n- **CoinInventory:** tracks denominations, `can_make_change(amount)`, `get_change(amount)`",
+    "starter_code": {"text": "## Vending Machine Design\n\n### State Diagram\n\n### State Pattern Implementation\n\n### Core Classes\n\n### Payment & Change Logic\n\n### Error Handling\n"},
+    "tags": ["design-patterns", "state-machine", "oop-design"],
+    "companies": ["Amazon", "Google", "Microsoft", "Bloomberg"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design an ATM System",
+    "slug": "design-atm-system",
+    "description": "Design an object-oriented system for an ATM machine.\n\n**Requirements:**\n- Authentication: Card insertion, PIN verification (3 attempts before lock)\n- Operations: Check balance, withdraw cash, deposit, transfer between accounts, change PIN\n- Cash dispensing: Multiple denominations ($100, $50, $20, $10)\n- Security: Card skimming protection, session timeout (90 seconds)\n- Logging: All transactions logged with timestamp, amount, account\n- Network: Communicates with bank server for real-time balance checks\n\n**Scale:**\n- 1000 ATMs per bank network, must work offline for balance inquiry\n\n**Follow-ups:**\n- How do you prevent concurrent withdrawals from the same account?\n- How do you handle network failures (offline mode)?",
+    "difficulty": "hard",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "security_design", "weight": 0.25},
+      {"criterion": "transaction_handling", "weight": 0.25},
+      {"criterion": "concurrency", "weight": 0.20},
+      {"criterion": "class_design", "weight": 0.20},
+      {"criterion": "error_handling", "weight": 0.10}
+    ],
+    "constraints": "- PIN is hashed, never stored in plaintext\n- Concurrent withdrawals from same account must be prevented\n- Network timeout falls back gracefully",
+    "hints": [
+      "Model the ATM as a state machine: IDLE → CARD_INSERTED → PIN_VERIFIED → TRANSACTION → COMPLETE.",
+      "Separate the ATM (physical machine) from the Bank (account management). ATM talks to Bank via a network interface.",
+      "For concurrency: the Bank server uses optimistic locking or distributed locks per account during withdrawal."
+    ],
+    "solution": "## Model Answer\n\n### Architecture\n```\nATM (client) ←──── Secure Channel ────► BankServer\n    │\n  CardReader, Keypad, Display, CashDispenser\n```\n\n### Core Classes\n- **ATM:** State machine, holds references to hardware components, `BankService`\n- **Card:** `card_number` (encrypted), `expiry`, `card_type`\n- **Account:** `account_id`, `balance`, `account_type`, `owner`\n- **Transaction:** `tx_id`, `account`, `type`, `amount`, `timestamp`, `status`\n- **CashDispenser:** `denominations: Dict[int, int]`, `can_dispense(amount)`, `dispense(amount)`\n- **BankService (interface):** `authenticate(card, pin)`, `get_balance(account)`, `withdraw(account, amount)`, `deposit(account, amount)`\n\n### Security\n- PIN stored as `bcrypt(pin + account_salt)`\n- Session token with 90s TTL after authentication\n- All network comms over TLS\n- Distributed lock: `SETNX atm_lock:{account_id} {tx_id} EX 30` (Redis) before withdrawal\n\n### Concurrency Control\nWithdrawal uses database transaction with `SELECT ... FOR UPDATE` on the account row, preventing race conditions.",
+    "starter_code": {"text": "## ATM System Design\n\n### Architecture Overview\n\n### State Machine\n\n### Core Classes\n\n### Security Design (PIN, Sessions)\n\n### Concurrency: Preventing Race Conditions\n\n### Error Handling & Offline Mode\n"},
+    "tags": ["oop-design", "security", "concurrency", "state-machine"],
+    "companies": ["Amazon", "Goldman Sachs", "JPMorgan", "Visa"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a File System",
+    "slug": "design-file-system",
+    "description": "Design an in-memory file system that supports the following operations:\n\n**Operations:**\n- `ls(path)` → list files/directories at path (sorted)\n- `mkdir(path)` → create directories recursively\n- `addContentToFile(filePath, content)` → create or append to file\n- `readContentFromFile(filePath)` → return file contents\n- `rm(path)` → remove file or directory (recursively)\n- `mv(src, dst)` → move/rename file or directory\n\n**Permissions:**\n- Files and directories have owner, group, and permission bits (rwxrwxrwx style)\n- `chmod(path, mode)` changes permissions\n\n**Follow-ups:**\n- How would you add hard links and symbolic links?\n- How would you persist this to disk?",
+    "difficulty": "hard",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "data_structure_choice", "weight": 0.30},
+      {"criterion": "api_design", "weight": 0.25},
+      {"criterion": "permission_model", "weight": 0.20},
+      {"criterion": "operations_correctness", "weight": 0.15},
+      {"criterion": "edge_cases", "weight": 0.10}
+    ],
+    "constraints": "- Paths are absolute (start with /)\n- `ls` returns sorted results\n- mkdir creates all intermediate directories\n- rm on a non-existent path raises an error",
+    "hints": [
+      "A Trie (prefix tree) naturally models a hierarchical file system — each node is a directory or file.",
+      "Each TrieNode needs: `is_file` flag, `content` (if file), `children: Dict[name, TrieNode]`, `permissions`.",
+      "Path parsing: split by '/' and traverse the trie. Handle edge cases for root '/' carefully."
+    ],
+    "solution": "## Model Answer\n\n### Data Structure: Trie\n```python\nclass TrieNode:\n    def __init__(self):\n        self.children: Dict[str, TrieNode] = {}\n        self.is_file: bool = False\n        self.content: str = ''\n        self.permissions: str = 'rwxr-xr-x'\n        self.owner: str = 'root'\n```\n\n### Path Traversal\n```python\ndef _traverse(self, path: str) -> TrieNode:\n    node = self.root\n    parts = [p for p in path.split('/') if p]\n    for part in parts:\n        if part not in node.children:\n            raise FileNotFoundError(path)\n        node = node.children[part]\n    return node\n```\n\n### Key Operations\n- **ls:** traverse to node, return sorted `children.keys()` (or `[last_part]` if file)\n- **mkdir:** traverse/create each path component\n- **addContentToFile:** traverse to parent, create/update file node\n- **rm:** traverse to parent, delete child key (cascades naturally since children are garbage collected)\n\n### Permission Model\nStore as octal int (e.g., `0o755`). `chmod` updates the node's permission field. Check on each operation: `(node.permissions >> shift) & 0b111`.",
+    "starter_code": {"text": "## File System Design\n\n### Data Structure Choice\n\n### Core TrieNode Structure\n\n### Operations Implementation\n\n### Permission Model\n\n### Edge Cases\n"},
+    "tags": ["data-structures", "trie", "oop-design", "api-design"],
+    "companies": ["Google", "Dropbox", "Amazon", "Microsoft"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  }
+]

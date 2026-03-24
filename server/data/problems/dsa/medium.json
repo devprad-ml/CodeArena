@@ -1,1 +1,278 @@
-[]
+[
+  {
+    "title": "3Sum",
+    "slug": "three-sum",
+    "description": "Given an integer array `nums`, return all unique triplets that sum to zero.\n\nPrint each triplet on its own line with values sorted ascending. Print triplets in lexicographic order. If none, print `none`.\n\n**Example 1:**\n```\nInput:\n6\n-1 0 1 2 -1 -4\nOutput:\n-1 -1 2\n-1 0 1\n```\n\n**Example 2:**\n```\nInput:\n3\n0 0 0\nOutput: 0 0 0\n```",
+    "category": "arrays",
+    "test_cases": [
+      {"input": "6\n-1 0 1 2 -1 -4", "expected_output": "-1 -1 2\n-1 0 1", "is_hidden": false},
+      {"input": "3\n0 0 0", "expected_output": "0 0 0", "is_hidden": false},
+      {"input": "2\n0 1", "expected_output": "none", "is_hidden": false},
+      {"input": "5\n-2 0 1 1 2", "expected_output": "-2 0 2\n-2 1 1", "is_hidden": true},
+      {"input": "4\n-4 -1 -1 0", "expected_output": "none", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 3 <= nums.length <= 3000\n- -10^5 <= nums[i] <= 10^5",
+    "hints": [
+      "Sort the array first — this makes it easy to skip duplicates and use two pointers.",
+      "Fix one element `nums[i]` and use two pointers on the remainder to find pairs summing to `-nums[i]`.",
+      "Skip duplicate values of `i`, `left`, and `right` after each found triplet."
+    ],
+    "solution": "## Solution: Sort + Two Pointers\n\nSort the array. For each index `i`, use two pointers `left = i+1` and `right = n-1`. Move them toward each other based on the current sum. Skip duplicates.\n\n**Time:** O(n²) | **Space:** O(1) excluding output",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef three_sum(nums):\n    # Return list of sorted triplets (as lists), sorted lexicographically\n    pass\n\nn = int(input())\nnums = list(map(int, input().split()))\nresult = three_sum(nums)\nif not result:\n    print('none')\nelse:\n    for t in result:\n        print(' '.join(map(str, t)))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nfunction threeSum(nums) {\n  // Return array of sorted triplets\n}\nconst result = threeSum(nums);\nif (!result.length) console.log('none');\nelse result.forEach(t => console.log(t.join(' ')));"
+    },
+    "tags": ["arrays", "two-pointers", "sorting"],
+    "companies": ["Amazon", "Facebook", "Adobe", "Microsoft", "Uber"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Longest Substring Without Repeating Characters",
+    "slug": "longest-substring-no-repeat",
+    "description": "Given a string `s`, find the length of the longest substring without repeating characters.\n\n**Example 1:**\n```\nInput: abcabcbb\nOutput: 3\n```\nExplanation: The answer is `abc`, length 3.\n\n**Example 2:**\n```\nInput: pwwkew\nOutput: 3\n```\nExplanation: The answer is `wke`, length 3.",
+    "category": "strings",
+    "test_cases": [
+      {"input": "abcabcbb", "expected_output": "3", "is_hidden": false},
+      {"input": "bbbbb", "expected_output": "1", "is_hidden": false},
+      {"input": "pwwkew", "expected_output": "3", "is_hidden": false},
+      {"input": "dvdf", "expected_output": "3", "is_hidden": true},
+      {"input": "abcdefgh", "expected_output": "8", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 0 <= s.length <= 5 * 10^4\n- s consists of English letters, digits, symbols and spaces",
+    "hints": [
+      "Think about a sliding window: maintain a window `[left, right]` with no duplicates.",
+      "Use a hash map to store the last seen index of each character.",
+      "When a duplicate is found, move `left` to just after the previous occurrence."
+    ],
+    "solution": "## Solution: Sliding Window + Hash Map\n\nMaintain `left` pointer and a map of `char -> last_index`. When a repeat is found, advance `left`. Track max window size.\n\n**Time:** O(n) | **Space:** O(charset size)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef length_of_longest_substring(s):\n    # Your code here\n    pass\n\ns = input().strip()\nprint(length_of_longest_substring(s))",
+      "javascript": "const s = require('fs').readFileSync('/dev/stdin','utf8').trim();\nfunction lengthOfLongestSubstring(s) {\n  // Your code here\n}\nconsole.log(lengthOfLongestSubstring(s));"
+    },
+    "tags": ["strings", "sliding-window", "hash-table"],
+    "companies": ["Amazon", "Adobe", "Bloomberg", "Facebook", "Google"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Coin Change",
+    "slug": "coin-change",
+    "description": "Given coins of different denominations and a target `amount`, return the fewest coins needed to make the amount. Return `-1` if impossible.\n\nYou may use each coin denomination unlimited times.\n\n**Example 1:**\n```\nInput:\n3\n1 5 11\n15\nOutput: 3\n```\nExplanation: 11 + 3×1 = 3 coins\n\n**Example 2:**\n```\nInput:\n3\n2 5 10\n3\nOutput: -1\n```",
+    "category": "dynamic_programming",
+    "test_cases": [
+      {"input": "3\n1 5 11\n15", "expected_output": "3", "is_hidden": false},
+      {"input": "3\n2 5 10\n3", "expected_output": "-1", "is_hidden": false},
+      {"input": "1\n1\n0", "expected_output": "0", "is_hidden": false},
+      {"input": "3\n1 2 5\n11", "expected_output": "3", "is_hidden": true},
+      {"input": "2\n3 7\n18", "expected_output": "4", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= coins.length <= 12\n- 1 <= coins[i] <= 2^31 - 1\n- 0 <= amount <= 10^4",
+    "hints": [
+      "Build up solutions for smaller amounts first (bottom-up DP).",
+      "Define `dp[i]` as the minimum coins needed to make amount `i`. Base case: `dp[0] = 0`.",
+      "For each amount `i`, try each coin `c`: if `i >= c`, then `dp[i] = min(dp[i], dp[i-c] + 1)`."
+    ],
+    "solution": "## Solution: Bottom-Up DP\n\nInitialize `dp = [inf] * (amount+1)`, `dp[0] = 0`. For each amount and each coin, try to improve the answer.\n\n**Time:** O(amount × len(coins)) | **Space:** O(amount)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef coin_change(coins, amount):\n    # Your code here\n    pass\n\nn = int(input())\ncoins = list(map(int, input().split()))\namount = int(input())\nprint(coin_change(coins, amount))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst coins = lines[1].split(' ').map(Number);\nconst amount = parseInt(lines[2]);\nfunction coinChange(coins, amount) {\n  // Your code here\n}\nconsole.log(coinChange(coins, amount));"
+    },
+    "tags": ["dynamic-programming", "arrays"],
+    "companies": ["Amazon", "Goldman Sachs", "Lyft", "Microsoft", "Uber"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "House Robber",
+    "slug": "house-robber",
+    "description": "You are planning to rob houses along a street. Adjacent houses have a security system — you cannot rob two adjacent houses.\n\nGiven an array of money amounts per house, return the maximum you can rob.\n\n**Example 1:**\n```\nInput:\n4\n1 2 3 1\nOutput: 4\n```\n\n**Example 2:**\n```\nInput:\n5\n2 7 9 3 1\nOutput: 12\n```",
+    "category": "dynamic_programming",
+    "test_cases": [
+      {"input": "4\n1 2 3 1", "expected_output": "4", "is_hidden": false},
+      {"input": "5\n2 7 9 3 1", "expected_output": "12", "is_hidden": false},
+      {"input": "1\n5", "expected_output": "5", "is_hidden": true},
+      {"input": "6\n2 1 1 2 1 1", "expected_output": "5", "is_hidden": true},
+      {"input": "3\n10 1 10", "expected_output": "20", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= nums.length <= 100\n- 0 <= nums[i] <= 400",
+    "hints": [
+      "At each house you decide: rob it (skip previous) or skip it.",
+      "Define `dp[i]` as the max money from the first `i` houses.",
+      "`dp[i] = max(dp[i-1], dp[i-2] + nums[i])`. You only need the last two values."
+    ],
+    "solution": "## Solution: DP with O(1) Space\n\nTrack `prev2` and `prev1`. For each house: `curr = max(prev1, prev2 + nums[i])`. Shift forward.\n\n**Time:** O(n) | **Space:** O(1)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef house_robber(nums):\n    # Your code here\n    pass\n\nn = int(input())\nnums = list(map(int, input().split()))\nprint(house_robber(nums))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nfunction houseRobber(nums) {\n  // Your code here\n}\nconsole.log(houseRobber(nums));"
+    },
+    "tags": ["dynamic-programming", "arrays"],
+    "companies": ["Airbnb", "Amazon", "Google", "LinkedIn"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Number of Islands",
+    "slug": "number-of-islands",
+    "description": "Given an `m x n` binary grid where `1` is land and `0` is water, return the number of islands.\n\nAn island is formed by connecting adjacent land cells horizontally or vertically.\n\n**Example 1:**\n```\nInput:\n4 5\n1 1 1 1 0\n1 1 0 1 0\n1 1 0 0 0\n0 0 0 0 0\nOutput: 1\n```\n\n**Example 2:**\n```\nInput:\n4 5\n1 1 0 0 0\n1 1 0 0 0\n0 0 1 0 0\n0 0 0 1 1\nOutput: 3\n```",
+    "category": "graphs",
+    "test_cases": [
+      {"input": "4 5\n1 1 1 1 0\n1 1 0 1 0\n1 1 0 0 0\n0 0 0 0 0", "expected_output": "1", "is_hidden": false},
+      {"input": "4 5\n1 1 0 0 0\n1 1 0 0 0\n0 0 1 0 0\n0 0 0 1 1", "expected_output": "3", "is_hidden": false},
+      {"input": "1 1\n1", "expected_output": "1", "is_hidden": true},
+      {"input": "2 2\n0 0\n0 0", "expected_output": "0", "is_hidden": true},
+      {"input": "3 3\n1 0 1\n0 1 0\n1 0 1", "expected_output": "5", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= m, n <= 300\n- grid[i][j] is 0 or 1",
+    "hints": [
+      "Iterate through the grid. When you find a `1`, it's a new island — increment count.",
+      "Use DFS or BFS from that cell to mark all connected land cells as visited.",
+      "Marking visited cells as `0` in-place avoids needing a separate visited array."
+    ],
+    "solution": "## Solution: DFS Flood Fill\n\nFor each unvisited `1`, run DFS to mark all connected `1`s as `0`, then increment island count.\n\n**Time:** O(m×n) | **Space:** O(m×n) recursion stack",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef num_islands(grid):\n    # Your code here\n    pass\n\nrows, cols = map(int, input().split())\ngrid = [list(map(int, input().split())) for _ in range(rows)]\nprint(num_islands(grid))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst [rows, cols] = lines[0].split(' ').map(Number);\nconst grid = [];\nfor (let i = 1; i <= rows; i++) grid.push(lines[i].split(' ').map(Number));\nfunction numIslands(grid) {\n  // Your code here\n}\nconsole.log(numIslands(grid));"
+    },
+    "tags": ["graphs", "dfs", "bfs", "matrix"],
+    "companies": ["Amazon", "Bloomberg", "Facebook", "Google", "Microsoft"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Subarray Sum Equals K",
+    "slug": "subarray-sum-equals-k",
+    "description": "Given an array `nums` and an integer `k`, return the count of subarrays whose sum equals `k`.\n\n**Example 1:**\n```\nInput:\n5\n1 1 1 1 1\n3\nOutput: 3\n```\n\n**Example 2:**\n```\nInput:\n4\n1 2 3 4\n3\nOutput: 2\n```\nSubarrays [1,2] and [3] both sum to 3.",
+    "category": "arrays",
+    "test_cases": [
+      {"input": "5\n1 1 1 1 1\n3", "expected_output": "3", "is_hidden": false},
+      {"input": "4\n1 2 3 4\n3", "expected_output": "2", "is_hidden": false},
+      {"input": "3\n-1 1 0\n0", "expected_output": "3", "is_hidden": true},
+      {"input": "5\n1 -1 1 -1 1\n0", "expected_output": "4", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= nums.length <= 2 * 10^4\n- -1000 <= nums[i] <= 1000\n- -10^7 <= k <= 10^7",
+    "hints": [
+      "Brute force checks all O(n²) subarrays. Can you do O(n)?",
+      "Think about prefix sums: `sum(i..j) = prefix[j] - prefix[i-1]`.",
+      "Store prefix sums in a hash map. If `prefix - k` is in the map, those subarrays sum to k."
+    ],
+    "solution": "## Solution: Prefix Sum Hash Map\n\nMaintain running sum and `counts` map. For each element, if `running_sum - k` is in the map, add that count to the result.\n\n**Time:** O(n) | **Space:** O(n)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef subarray_sum(nums, k):\n    # Your code here\n    pass\n\nn = int(input())\nnums = list(map(int, input().split()))\nk = int(input())\nprint(subarray_sum(nums, k))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nconst k = parseInt(lines[2]);\nfunction subarraySum(nums, k) {\n  // Your code here\n}\nconsole.log(subarraySum(nums, k));"
+    },
+    "tags": ["arrays", "hash-table", "prefix-sum"],
+    "companies": ["Facebook", "Google", "Amazon", "PayPal"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Maximum Product Subarray",
+    "slug": "maximum-product-subarray",
+    "description": "Given an integer array `nums`, find the subarray with the largest product and return it.\n\n**Example 1:**\n```\nInput:\n5\n2 3 -2 4 1\nOutput: 6\n```\n\n**Example 2:**\n```\nInput:\n3\n-2 3 -4\nOutput: 24\n```",
+    "category": "dynamic_programming",
+    "test_cases": [
+      {"input": "5\n2 3 -2 4 1", "expected_output": "6", "is_hidden": false},
+      {"input": "3\n-2 3 -4", "expected_output": "24", "is_hidden": false},
+      {"input": "4\n-2 0 -1 3", "expected_output": "3", "is_hidden": false},
+      {"input": "1\n-2", "expected_output": "-2", "is_hidden": true},
+      {"input": "6\n-1 -2 -3 0 2 3", "expected_output": "6", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= nums.length <= 2 * 10^4\n- -10 <= nums[i] <= 10",
+    "hints": [
+      "Unlike sum, product is affected by negatives — two negatives can give a big positive.",
+      "Track both `max_prod` and `min_prod` at each position.",
+      "When encountering a negative, the current max becomes the new min and vice versa."
+    ],
+    "solution": "## Solution: Track Max and Min\n\nAt each step, `new_max = max(num, max_prod*num, min_prod*num)`. Similarly for `new_min`. Update global max.\n\n**Time:** O(n) | **Space:** O(1)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef max_product(nums):\n    # Your code here\n    pass\n\nn = int(input())\nnums = list(map(int, input().split()))\nprint(max_product(nums))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nfunction maxProduct(nums) {\n  // Your code here\n}\nconsole.log(maxProduct(nums));"
+    },
+    "tags": ["dynamic-programming", "arrays"],
+    "companies": ["Amazon", "LinkedIn", "Goldman Sachs"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Sort Colors",
+    "slug": "sort-colors",
+    "description": "Given an array with values `0` (red), `1` (white), or `2` (blue), sort it in-place in one pass without using a library sort.\n\n**Example 1:**\n```\nInput:\n6\n2 0 2 1 1 0\nOutput: 0 0 1 1 2 2\n```\n\n**Example 2:**\n```\nInput:\n3\n2 0 1\nOutput: 0 1 2\n```",
+    "category": "sorting_searching",
+    "test_cases": [
+      {"input": "6\n2 0 2 1 1 0", "expected_output": "0 0 1 1 2 2", "is_hidden": false},
+      {"input": "3\n2 0 1", "expected_output": "0 1 2", "is_hidden": false},
+      {"input": "1\n1", "expected_output": "1", "is_hidden": true},
+      {"input": "5\n0 0 0 1 2", "expected_output": "0 0 0 1 2", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= n <= 300\n- nums[i] is 0, 1, or 2",
+    "hints": [
+      "A two-pass approach: count 0s, 1s, 2s, then overwrite.",
+      "For a true one-pass solution, look up Dijkstra's Dutch National Flag algorithm.",
+      "Use three pointers: `low`, `mid`, `high`. Elements left of `low` are 0s, right of `high` are 2s."
+    ],
+    "solution": "## Solution: Dutch National Flag\n\n`low=0, mid=0, high=n-1`. While `mid<=high`: if `nums[mid]==0` swap with low, advance both; if `1` advance mid; if `2` swap with high, decrement high.\n\n**Time:** O(n) | **Space:** O(1)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef sort_colors(nums):\n    # Sort in place\n    pass\n\nn = int(input())\nnums = list(map(int, input().split()))\nsort_colors(nums)\nprint(' '.join(map(str, nums)))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nfunction sortColors(nums) {\n  // Sort in place\n}\nsortColors(nums);\nconsole.log(nums.join(' '));"
+    },
+    "tags": ["sorting", "arrays", "two-pointers"],
+    "companies": ["Amazon", "Facebook", "Microsoft"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Valid Anagram",
+    "slug": "valid-anagram",
+    "description": "Given two strings `s` and `t`, return `true` if `t` is an anagram of `s`.\n\n**Example 1:**\n```\nInput:\nanagram\nnagaram\nOutput: true\n```\n\n**Example 2:**\n```\nInput:\nrat\ncar\nOutput: false\n```",
+    "category": "strings",
+    "test_cases": [
+      {"input": "anagram\nnagaram", "expected_output": "true", "is_hidden": false},
+      {"input": "rat\ncar", "expected_output": "false", "is_hidden": false},
+      {"input": "ab\nba", "expected_output": "true", "is_hidden": true},
+      {"input": "abc\nabcd", "expected_output": "false", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= s.length, t.length <= 5 * 10^4\n- s and t consist of lowercase English letters",
+    "hints": [
+      "Two strings are anagrams if they have the same characters with the same frequencies.",
+      "Count frequencies for both strings using a hash map.",
+      "Sorting both and comparing also works but is O(n log n)."
+    ],
+    "solution": "## Solution: Frequency Count\n\nUse a 26-element array (or hash map) to count character frequencies. If lengths differ, return false immediately.\n\n**Time:** O(n) | **Space:** O(1)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef is_anagram(s, t):\n    # Your code here\n    pass\n\ns = input().strip()\nt = input().strip()\nprint('true' if is_anagram(s, t) else 'false')",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst s = lines[0];\nconst t = lines[1];\nfunction isAnagram(s, t) {\n  // Your code here\n}\nconsole.log(isAnagram(s, t) ? 'true' : 'false');"
+    },
+    "tags": ["strings", "hash-table", "sorting"],
+    "companies": ["Amazon", "Bloomberg", "Capital One", "Google"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Jump Game",
+    "slug": "jump-game",
+    "description": "You are at index `0` of array `nums`. `nums[i]` is the max jump length from position `i`. Return `true` if you can reach the last index.\n\n**Example 1:**\n```\nInput:\n5\n2 3 1 1 4\nOutput: true\n```\n\n**Example 2:**\n```\nInput:\n5\n3 2 1 0 4\nOutput: false\n```\nYou always reach index 3 but its jump is 0.",
+    "category": "arrays",
+    "test_cases": [
+      {"input": "5\n2 3 1 1 4", "expected_output": "true", "is_hidden": false},
+      {"input": "5\n3 2 1 0 4", "expected_output": "false", "is_hidden": false},
+      {"input": "1\n0", "expected_output": "true", "is_hidden": true},
+      {"input": "3\n1 0 1", "expected_output": "false", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= nums.length <= 3 * 10^4\n- 0 <= nums[i] <= 10^5",
+    "hints": [
+      "Track the farthest index you can currently reach.",
+      "At each index `i`, update `max_reach = max(max_reach, i + nums[i])`.",
+      "If `i > max_reach` at any point, you cannot advance further."
+    ],
+    "solution": "## Solution: Greedy\n\nTrack `max_reach`. For each `i` up to `max_reach`, update `max_reach = max(max_reach, i + nums[i])`. If `max_reach >= n-1`, return true.\n\n**Time:** O(n) | **Space:** O(1)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef can_jump(nums):\n    # Your code here\n    pass\n\nn = int(input())\nnums = list(map(int, input().split()))\nprint('true' if can_jump(nums) else 'false')",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nfunction canJump(nums) {\n  // Your code here\n}\nconsole.log(canJump(nums) ? 'true' : 'false');"
+    },
+    "tags": ["arrays", "greedy", "dynamic-programming"],
+    "companies": ["Amazon", "Bloomberg", "Microsoft", "Spotify"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  }
+]
