@@ -1,1 +1,201 @@
-[]
+[
+  {
+    "title": "Design a URL Shortener",
+    "slug": "design-url-shortener",
+    "description": "Design a URL shortening service like TinyURL or bit.ly.\n\n**Requirements:**\n- `shorten(longUrl) → shortUrl`: Generate a short code (e.g., `tiny.url/abc123`)\n- `redirect(shortCode) → longUrl`: Redirect to original URL (301/302)\n- Custom aliases: Users can optionally specify their own short code\n- Analytics: Track click count, referrer, geography per short URL\n- Expiry: URLs expire after a configurable TTL (default: 5 years)\n\n**Scale:**\n- 100M new URLs per day (write-heavy? read-heavy?)\n- 10B redirects per day\n- 99.99% availability required\n- Read:Write ratio ≈ 100:1\n\n**Follow-ups:**\n- How do you handle collisions in short code generation?\n- How would you prevent abuse (malicious URL shortening)?",
+    "difficulty": "easy",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "core_components", "weight": 0.25},
+      {"criterion": "database_choice", "weight": 0.20},
+      {"criterion": "hash_function", "weight": 0.20},
+      {"criterion": "scalability", "weight": 0.20},
+      {"criterion": "edge_cases", "weight": 0.15}
+    ],
+    "constraints": "- Short codes are 6-8 alphanumeric characters\n- 99.99% uptime = < 1hr downtime/year\n- Redirect latency < 50ms (p99)\n- Storage: ~5 years × 100M/day × ~500 bytes ≈ 90TB",
+    "hints": [
+      "Start with the core API: POST /shorten and GET /{code}. What does each need?",
+      "For short code generation: base62 encoding of an auto-increment ID, or MD5/SHA256 hash truncated to 7 chars.",
+      "The redirect path is on the critical path — cache short_code → long_url in Redis to avoid DB hits."
+    ],
+    "solution": "## Model Answer\n\n### Components\n1. **Load Balancer** → distributes traffic to API servers\n2. **API Servers** (stateless, horizontally scalable)\n3. **Short Code Generator Service** — base62(auto-increment ID) or hash-based\n4. **Database** — NoSQL (Cassandra/DynamoDB) for url mappings: `short_code → {long_url, created_at, expiry, user_id}`\n5. **Cache** (Redis) — `short_code → long_url`, TTL = 24h, handles ~90% of redirect traffic\n6. **Analytics Service** — async via message queue (Kafka), stores click events\n\n### Short Code Generation\n**Option A: Counter + Base62**\n- Distributed counter (e.g., Zookeeper or pre-allocated ranges)\n- `base62(counter)` gives 7 chars for IDs up to 62^7 = 3.5 trillion\n- Pro: no collisions. Con: predictable/sequential codes.\n\n**Option B: MD5 Hash**\n- `md5(longUrl + timestamp)[0:7]`\n- Collision probability is low but must handle via retry\n\n### Redirect Flow\n```\nGET /abc123\n  → Redis LOOKUP (hit: 90%+ → return 301)\n  → DB LOOKUP (miss → cache + return 301)\n```\n\n### Database\nWrite: ~1,160/sec (100M/day). Read: ~115,000/sec. Use read replicas. Shard by `short_code[0]`.",
+    "starter_code": {"text": "## URL Shortener Design\n\n### Requirements\n- Functional:\n- Non-functional:\n\n### High-Level Architecture\n\n### Short Code Generation Strategy\n\n### Database Design\n\n### Caching Strategy\n\n### Scalability & Trade-offs\n"},
+    "tags": ["system-design", "hashing", "caching", "databases"],
+    "companies": ["Amazon", "Google", "Microsoft", "Twitter", "Uber"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Rate Limiter",
+    "slug": "design-rate-limiter",
+    "description": "Design a rate limiter that restricts how many requests a client can make to an API within a time window.\n\n**Requirements:**\n- Limit: N requests per time window (e.g., 100 req/min per user)\n- Algorithms to consider: Token Bucket, Leaky Bucket, Fixed Window Counter, Sliding Window Log, Sliding Window Counter\n- Distributed: Must work across multiple API server instances\n- Low latency: Rate limit check should add < 1ms overhead\n- Graceful: Return HTTP 429 with `Retry-After` header when limited\n\n**Scale:**\n- 10M API requests/sec globally\n- Rules vary per user tier (Free: 100/min, Pro: 1000/min, Enterprise: custom)\n\n**Follow-ups:**\n- How do you handle rate limiting at both user and IP level simultaneously?\n- How do you rate limit across multiple data centers?",
+    "difficulty": "easy",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "algorithm_choice", "weight": 0.30},
+      {"criterion": "distributed_handling", "weight": 0.25},
+      {"criterion": "implementation_detail", "weight": 0.25},
+      {"criterion": "edge_cases", "weight": 0.20}
+    ],
+    "constraints": "- Distributed — multiple servers must share state\n- Redis is available as a shared cache\n- Rate limit rules are configurable per user tier",
+    "hints": [
+      "For a distributed system, you need centralized state — Redis is the standard choice.",
+      "Token Bucket is the most common in practice: `INCRBY key 1 EX window` with Lua script for atomicity.",
+      "Sliding window is more accurate but more expensive — uses a sorted set of timestamps in Redis."
+    ],
+    "solution": "## Model Answer\n\n### Algorithm Comparison\n| Algorithm | Accuracy | Memory | Burst Allowed |\n|-----------|----------|--------|---------------|\n| Fixed Window | Medium | O(1) | Yes (at window edges) |\n| Sliding Window Log | High | O(requests) | No |\n| Sliding Window Counter | High | O(1) | Minimal |\n| Token Bucket | High | O(1) | Yes (by design) |\n\n**Recommended: Token Bucket** — smooth traffic, allows controlled bursting.\n\n### Distributed Implementation (Redis + Lua)\n```lua\n-- Atomic token bucket check\nlocal key = KEYS[1]  -- e.g., rate_limit:user:123\nlocal rate = tonumber(ARGV[1])  -- tokens/second\nlocal capacity = tonumber(ARGV[2])\nlocal now = tonumber(ARGV[3])\n\nlocal bucket = redis.call('HMGET', key, 'tokens', 'last_refill')\nlocal tokens = tonumber(bucket[1]) or capacity\nlocal last_refill = tonumber(bucket[2]) or now\n\nlocal elapsed = now - last_refill\ntokens = math.min(capacity, tokens + elapsed * rate)\n\nif tokens >= 1 then\n  tokens = tokens - 1\n  redis.call('HMSET', key, 'tokens', tokens, 'last_refill', now)\n  redis.call('EXPIRE', key, 3600)\n  return 1  -- allowed\nelse\n  return 0  -- rejected\nend\n```\n\n### API Gateway Integration\nMiddleware checks rate limit before routing. Returns `429 Too Many Requests` with `Retry-After: {seconds}` header.",
+    "starter_code": {"text": "## Rate Limiter Design\n\n### Algorithm Choice & Justification\n\n### Distributed Architecture\n\n### Redis Data Structure\n\n### Implementation (Pseudocode)\n\n### Edge Cases\n"},
+    "tags": ["system-design", "redis", "algorithms", "distributed-systems"],
+    "companies": ["Stripe", "Cloudflare", "Amazon", "Google", "Twitter"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Distributed Key-Value Store",
+    "slug": "design-key-value-store",
+    "description": "Design a distributed key-value store like Redis, DynamoDB, or Cassandra.\n\n**Requirements:**\n- `get(key) → value`\n- `put(key, value)`\n- `delete(key)`\n- Horizontal scalability — data partitioned across nodes\n- Replication — data replicated to N nodes for fault tolerance\n- Tunable consistency — support both eventual and strong consistency\n- High availability — system remains operational even with node failures\n\n**Scale:**\n- 1TB total data, 100K reads/sec, 10K writes/sec\n- 99.999% availability\n- Sub-10ms read latency (p99)\n\n**Follow-ups:**\n- How do you handle split-brain scenarios?\n- How do you rebalance data when adding/removing nodes?",
+    "difficulty": "medium",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "data_partitioning", "weight": 0.25},
+      {"criterion": "replication_strategy", "weight": 0.20},
+      {"criterion": "consistency_model", "weight": 0.25},
+      {"criterion": "fault_tolerance", "weight": 0.20},
+      {"criterion": "api_design", "weight": 0.10}
+    ],
+    "constraints": "- CAP theorem applies — state your trade-offs\n- Consistent hashing for partitioning\n- Support at least 3-node replication",
+    "hints": [
+      "Consistent hashing distributes keys to nodes with minimal rebalancing when nodes join/leave.",
+      "For replication, you need a quorum strategy: W + R > N ensures strong consistency (e.g., N=3, W=2, R=2).",
+      "A gossip protocol lets nodes exchange health/state info without a central coordinator."
+    ],
+    "solution": "## Model Answer\n\n### Architecture\n**Consistent Hashing Ring** — each key maps to a position on the ring; served by the nearest clockwise node. Virtual nodes improve load distribution.\n\n### Partitioning\n- Hash `key` using SHA256, map to ring position\n- Each physical node owns N virtual nodes on the ring\n- Partition rebalancing: only adjacent nodes affected when adding/removing\n\n### Replication (like Dynamo/Cassandra)\n- Replication factor N=3: write to coordinator + 2 replicas\n- **Quorum:** W=2 writes + R=2 reads ensures overlap → strong consistency\n- **Eventual consistency mode:** W=1, R=1 — faster but reads may be stale\n\n### Conflict Resolution\n- **Vector clocks** track causality across replicas\n- On read conflict: last-write-wins (timestamp) or application-level merge\n\n### Fault Tolerance\n- **Heartbeat/Gossip** protocol for failure detection\n- **Hinted handoff:** writes destined for failed node stored temporarily at neighbor\n- **Anti-entropy** with Merkle trees to sync replicas\n\n### Consistency Models (CAP)\n- **CP mode:** Refuse writes if quorum unavailable\n- **AP mode:** Accept writes, resolve conflicts later",
+    "starter_code": {"text": "## Distributed Key-Value Store Design\n\n### Requirements & Scale\n\n### Data Partitioning Strategy\n\n### Replication & Consistency\n\n### Fault Tolerance\n\n### CAP Trade-offs\n\n### Read/Write Path\n"},
+    "tags": ["distributed-systems", "databases", "consistent-hashing", "replication"],
+    "companies": ["Amazon", "Facebook", "Google", "LinkedIn", "Microsoft"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design Twitter's News Feed",
+    "slug": "design-twitter-feed",
+    "description": "Design the news feed feature for a Twitter-like social network.\n\n**Requirements:**\n- Users follow other users\n- Feed shows the latest N tweets from followed users, ranked by recency + relevance\n- Post a tweet (text, media, retweet)\n- Like, retweet, reply\n- Feed must load in < 200ms\n\n**Scale:**\n- 300M daily active users\n- 600M tweets/day (7,000/sec avg, 150K/sec peak)\n- Each user follows ~300 accounts on average\n- Celebrity accounts: 100M+ followers\n\n**Follow-ups:**\n- How does the feed differ for celebrities vs regular users?\n- How do you incorporate ML-based relevance ranking?",
+    "difficulty": "medium",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "feed_generation_approach", "weight": 0.30},
+      {"criterion": "database_design", "weight": 0.20},
+      {"criterion": "caching_strategy", "weight": 0.20},
+      {"criterion": "scalability", "weight": 0.20},
+      {"criterion": "trade_offs", "weight": 0.10}
+    ],
+    "constraints": "- Feed latency < 200ms\n- Handle celebrity accounts (100M followers) without fan-out storm\n- Eventual consistency for feed is acceptable",
+    "hints": [
+      "Two approaches: Fan-Out on Write (push to followers' feeds on tweet) vs Fan-Out on Read (pull from followees on feed load). What are the trade-offs?",
+      "Fan-out on write is fast for readers but expensive for celebrities with 100M followers — consider a hybrid.",
+      "Store feeds in Redis sorted sets: `ZADD feed:{user_id} {timestamp} {tweet_id}`."
+    ],
+    "solution": "## Model Answer\n\n### Fan-Out Approaches\n**Fan-Out on Write (Push Model)**\n- On tweet: async push tweet_id to all followers' feed cache\n- Feed load: O(1) Redis read\n- Problem: 100M follower celebrity → 100M Redis writes per tweet\n\n**Fan-Out on Read (Pull Model)**\n- On tweet: store only in tweet DB\n- Feed load: fetch all followee IDs → get their recent tweets → merge-sort\n- Problem: slow for users following many accounts\n\n**Hybrid (Twitter's actual approach)**\n- Regular users: Fan-out on write → pre-computed feed in Redis\n- Celebrities (>100K followers): Excluded from fan-out\n- Feed load: pre-computed feed + live injection of celebrity tweets → merge\n\n### Data Model\n```\ntweets: tweet_id, user_id, content, created_at, media_url\nfollows: follower_id, followee_id, created_at  (indexed both ways)\nfeed_cache: Redis sorted set per user — ZADD feed:{uid} {timestamp} {tweet_id}\n```\n\n### Caching\n- Tweet content: Redis hash, TTL = 7 days (hot tweets)\n- Feed: Redis sorted set, keep last 1000 tweet IDs per user\n- User metadata: Memcached, TTL = 1hr\n\n### Write Path\n`POST /tweet` → Kafka → FanOut Service (workers) → Redis feed updates",
+    "starter_code": {"text": "## Twitter News Feed Design\n\n### Requirements & Scale\n\n### Feed Generation Strategy\n\n### Database Schema\n\n### Caching Layer\n\n### Celebrity Problem & Hybrid Approach\n\n### Read/Write Path\n"},
+    "tags": ["system-design", "social-network", "caching", "message-queue"],
+    "companies": ["Twitter", "Facebook", "Instagram", "LinkedIn"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Chat Messaging System",
+    "slug": "design-chat-messaging",
+    "description": "Design a real-time chat messaging system like WhatsApp or Slack.\n\n**Requirements:**\n- 1-on-1 messaging and group chats (up to 1000 members)\n- Real-time delivery when recipient is online\n- Offline storage: messages queued and delivered when user comes online\n- Message status: Sent ✓, Delivered ✓✓, Read ✓✓ (blue)\n- Media support: images, videos, voice messages\n- End-to-end encryption (mention, don't need to implement)\n\n**Scale:**\n- 1B users, 60B messages/day\n- 70% users are active daily\n- Average message size: 100 bytes (text)\n\n**Follow-ups:**\n- How do you scale group chats to 100,000 members?\n- How do you handle message ordering in distributed systems?",
+    "difficulty": "medium",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "message_delivery", "weight": 0.25},
+      {"criterion": "real_time_transport", "weight": 0.25},
+      {"criterion": "storage_design", "weight": 0.20},
+      {"criterion": "group_chats", "weight": 0.20},
+      {"criterion": "reliability", "weight": 0.10}
+    ],
+    "constraints": "- Message ordering must be maintained per conversation\n- Offline users receive all missed messages on reconnect\n- Group messages fan-out to all members",
+    "hints": [
+      "WebSocket maintains a persistent connection — ideal for real-time delivery. How do you route a message to the correct server holding the recipient's WS connection?",
+      "A message queue (Kafka) between senders and delivery workers provides durability and decoupling.",
+      "For group chats, fan-out to each member's inbox. Store group messages once, reference by message_id in each member's mailbox."
+    ],
+    "solution": "## Model Answer\n\n### Architecture\n```\nClient ──WebSocket──► Chat Server ──► Kafka ──► Delivery Workers\n                                              └──► Message DB (Cassandra)\n```\n\n### Real-Time Delivery\n- Each client maintains a persistent **WebSocket** to a Chat Server\n- **Presence Service** (Redis) tracks `user_id → server_id` mapping\n- To deliver to user B: lookup server → publish to that server's channel (Redis pub/sub) → server pushes via WS\n\n### Offline Delivery\n- Messages stored in Cassandra `messages` table regardless\n- User reconnects → pulls all unread messages since last `read_cursor`\n\n### Message Storage (Cassandra)\n```\nmessages(\n  conversation_id,\n  message_id (UUID with timestamp),\n  sender_id,\n  content,\n  media_url,\n  status\n) PRIMARY KEY (conversation_id, message_id)\n```\nCassandra's wide-row model is ideal — all messages for a conversation on one partition.\n\n### Group Chat Fan-Out\n- Store message once, fan-out message_id to each member's inbox\n- For large groups (>1000): use a pull model with a shared group timeline\n\n### Message Status Updates\n- Delivered: ack when WS push succeeds\n- Read: client sends read receipt when message is displayed",
+    "starter_code": {"text": "## Chat Messaging System Design\n\n### Requirements & Scale\n\n### Real-Time Transport (WebSocket)\n\n### Message Delivery Flow\n\n### Message Storage\n\n### Offline Handling\n\n### Group Chat Design\n"},
+    "tags": ["system-design", "websocket", "messaging", "distributed-systems"],
+    "companies": ["WhatsApp", "Facebook", "Slack", "Discord", "Microsoft"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Video Streaming Service",
+    "slug": "design-video-streaming",
+    "description": "Design a video streaming platform like YouTube or Netflix.\n\n**Requirements:**\n- Upload: Users upload videos (up to 10GB)\n- Processing: Transcode to multiple resolutions (360p, 720p, 1080p, 4K)\n- Streaming: Adaptive bitrate streaming based on client bandwidth\n- CDN: Deliver video chunks from edge nodes close to users\n- Search: Full-text search over video titles, descriptions, tags\n- Recommendations: Personalized video recommendations\n\n**Scale:**\n- 2B users, 500 hours of video uploaded every minute\n- 1B hours of video watched per day\n- Storage: 10 exabytes total\n\n**Follow-ups:**\n- How do you handle live streaming (HLS/DASH)?\n- How do you detect and remove copyright-infringing content?",
+    "difficulty": "hard",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "upload_pipeline", "weight": 0.20},
+      {"criterion": "transcoding_strategy", "weight": 0.20},
+      {"criterion": "cdn_usage", "weight": 0.20},
+      {"criterion": "adaptive_streaming", "weight": 0.20},
+      {"criterion": "scalability", "weight": 0.20}
+    ],
+    "constraints": "- Video upload must be resumable (chunked upload)\n- Transcoding must complete within 5 minutes of upload\n- Streaming latency < 2 seconds for first frame\n- 99.9% availability",
+    "hints": [
+      "Separate the upload pipeline (write path) from the streaming pipeline (read path) — they have completely different scaling requirements.",
+      "Transcoding is CPU-intensive — use a message queue and worker pool. Consider different resolution transcoding in parallel.",
+      "Adaptive Bitrate Streaming (HLS/DASH): split video into 2-10 second segments, provide a manifest file listing all quality variants."
+    ],
+    "solution": "## Model Answer\n\n### Upload Pipeline\n```\nClient ──chunked upload──► Upload Service ──► Object Storage (S3)\n                                          └──► Kafka ──► Transcoding Workers\n```\n1. Client splits video into 5MB chunks, uploads with resumable upload protocol\n2. Upload service assembles chunks in S3\n3. Publishes `video.uploaded` event to Kafka\n4. Transcoding workers pick up event, generate 360p/720p/1080p/4K variants in parallel\n5. On completion: update metadata DB, invalidate CDN cache, notify user\n\n### Streaming Architecture\n- **HLS/DASH:** Video split into 6-second segments stored in S3\n- **Manifest file:** Lists all quality variants and segment URLs\n- **CDN (CloudFront/Akamai):** Caches segments at edge nodes globally\n- **Adaptive Bitrate:** Player switches quality based on current bandwidth (monitors download speed)\n\n### Storage\n- **Object Storage (S3):** Raw uploads + transcoded segments (~10 exabytes)\n- **Metadata DB (Cassandra):** `video_id`, `title`, `owner`, `duration`, `segment_count`, `view_count`\n- **Search (Elasticsearch):** Full-text index on title + description + tags\n\n### CDN Strategy\n- Popular videos: pre-warm CDN cache\n- Long-tail (rarely watched): serve from origin (S3) on cache miss",
+    "starter_code": {"text": "## Video Streaming Service Design\n\n### Requirements & Scale\n\n### Upload Pipeline\n\n### Transcoding Strategy\n\n### Adaptive Bitrate Streaming (HLS/DASH)\n\n### CDN Architecture\n\n### Storage Design\n"},
+    "tags": ["system-design", "cdn", "streaming", "distributed-systems"],
+    "companies": ["YouTube", "Netflix", "Amazon", "Twitch", "TikTok"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Ride Sharing App",
+    "slug": "design-ride-sharing",
+    "description": "Design the core backend for a ride-sharing platform like Uber or Lyft.\n\n**Requirements:**\n- Rider requests a ride: specify pickup and dropoff\n- Driver matching: find nearest available driver\n- Real-time location tracking: track driver position every 4 seconds\n- Dynamic pricing (surge): price increases with demand\n- Trip management: start, end trip, calculate fare\n- Ratings: rider rates driver and vice versa after trip\n\n**Scale:**\n- 15M trips/day\n- 5M active drivers globally\n- Location updates: 5M drivers × 1 update/4 sec = 1.25M writes/sec\n\n**Follow-ups:**\n- How do you handle a driver who disconnects mid-trip?\n- How would you implement carpooling (matching multiple riders)?",
+    "difficulty": "hard",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "matching_algorithm", "weight": 0.25},
+      {"criterion": "location_service", "weight": 0.25},
+      {"criterion": "pricing_model", "weight": 0.20},
+      {"criterion": "data_consistency", "weight": 0.20},
+      {"criterion": "real_time_updates", "weight": 0.10}
+    ],
+    "constraints": "- Driver match must return within 3 seconds\n- Location data precision: 10 meter accuracy\n- A driver can only be matched to one rider at a time",
+    "hints": [
+      "Geospatial indexing is critical for the driver matching problem — look at geohashing or Redis GEO commands.",
+      "Driver location updates are write-heavy — consider a time-series DB or Redis for live positions, separate from the trips DB.",
+      "Matching algorithm: find K nearest drivers, filter by availability, dispatch request to the closest one first."
+    ],
+    "solution": "## Model Answer\n\n### Location Service\n- **Redis GEO** commands: `GEOADD drivers {lng} {lat} {driver_id}` per update\n- `GEORADIUS pickup_lat pickup_lng 5 km ASC COUNT 10` to find nearest drivers\n- Write path: Driver app → Location Service → Redis GEO (1.25M writes/sec easily handled)\n- Persist to Cassandra async for trip history\n\n### Matching Algorithm\n1. Get top-10 nearest available drivers via `GEORADIUS`\n2. Filter: `driver.status == AVAILABLE`\n3. Dispatch request to closest driver (ETA-based via map service)\n4. Set driver.status = PENDING, start 10-second acceptance timer\n5. If no accept: try next driver\n\n### Trip State Machine\n```\nREQUESTED → DRIVER_ACCEPTED → DRIVER_ARRIVED → IN_PROGRESS → COMPLETED\n     └───────────────────────────────────────── CANCELLED\n```\n\n### Dynamic Pricing\n- Demand/supply ratio per geohash cell\n- `surge_multiplier = f(demand_rate / supply_rate)`\n- Updated every 1 minute per geographic zone\n\n### Data Model\n```\ntrips: trip_id, rider_id, driver_id, pickup, dropoff, status, start_time, end_time, fare\ndrivers: driver_id, status (AVAILABLE/BUSY/OFFLINE), current_location, rating\nriders: rider_id, payment_method, rating\n```\n\n### Preventing Double Dispatch\nRedis atomic compare-and-swap: `SET driver:{id}:status PENDING NX EX 10`",
+    "starter_code": {"text": "## Ride Sharing App Design\n\n### Requirements & Scale\n\n### Location Service\n\n### Driver Matching Algorithm\n\n### Trip State Machine\n\n### Dynamic Pricing\n\n### Data Model\n"},
+    "tags": ["system-design", "geospatial", "real-time", "microservices"],
+    "companies": ["Uber", "Lyft", "DoorDash", "Amazon", "Google"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  },
+  {
+    "title": "Design a Distributed Job Scheduler",
+    "slug": "design-distributed-job-scheduler",
+    "description": "Design a distributed job scheduling system that can run jobs at scheduled times (like cron) or on-demand.\n\n**Requirements:**\n- Schedule jobs: one-time, recurring (cron expression), or event-triggered\n- Execute jobs: on any available worker node\n- Fault tolerance: if a worker fails mid-job, retry on another worker\n- At-most-once / at-least-once / exactly-once execution semantics\n- Priority queues: HIGH, MEDIUM, LOW priority jobs\n- Monitoring: job status, history, alerts on failures\n- Distributed: no single point of failure in the scheduler itself\n\n**Scale:**\n- 10M jobs/day, peak 5K jobs/sec\n- Job types: short (< 1min), long-running (hours)\n- Workers: 1000 nodes across multiple data centers\n\n**Follow-ups:**\n- How do you prevent the same job from running twice simultaneously?\n- How would you implement job dependencies (Job B runs after Job A completes)?",
+    "difficulty": "expert",
+    "test_cases": [],
+    "evaluation_criteria": [
+      {"criterion": "scheduling_algorithm", "weight": 0.25},
+      {"criterion": "fault_tolerance", "weight": 0.25},
+      {"criterion": "distributed_coordination", "weight": 0.25},
+      {"criterion": "monitoring", "weight": 0.15},
+      {"criterion": "scalability", "weight": 0.10}
+    ],
+    "constraints": "- No single point of failure anywhere in the system\n- Job execution must be idempotent for retries to be safe\n- Max acceptable delay: triggered job runs within 1 second of scheduled time",
+    "hints": [
+      "The hardest part is preventing double-execution — use distributed locking (Zookeeper/Redis) to ensure only one scheduler picks up a job.",
+      "Separate the scheduling concern (when to run) from the execution concern (run the job) — a Trigger Service feeds a job queue that Workers consume.",
+      "For exactly-once semantics, workers must record completion in a DB before acknowledging — combined with a dead letter queue for retries."
+    ],
+    "solution": "## Model Answer\n\n### Architecture\n```\nJob Registry ──► Trigger Service (cron scanner)\n                      │\n                   Job Queue (Kafka, partitioned by priority)\n                      │\n              Worker Pool (1000 nodes)\n                      │\n              Job DB + Execution Log\n```\n\n### Trigger Service (No SPOF)\n- **Leader election** via Zookeeper/etcd — one active trigger node at a time\n- On failover: standby takes over in < 5 seconds\n- Every 1 second: scan `jobs` table for `next_run <= now`, publish to Kafka\n- Update `next_run = calculate_next(cron_expr)` atomically\n\n### Preventing Double Execution\n```\n-- Atomic claim in Postgres\nUPDATE jobs \nSET status = 'RUNNING', worker_id = ?, claimed_at = NOW()\nWHERE job_id = ? AND status = 'SCHEDULED'\nRETURNING *;  -- empty result = already claimed\n```\n\n### Worker Execution\n1. Claim job (DB row lock)\n2. Execute job (with timeout)\n3. On success: update `status = COMPLETED`, record metrics\n4. On failure: increment `attempt_count`, if < max_retries → requeue with backoff; else → DEAD_LETTER\n\n### Fault Tolerance\n- **Heartbeat:** Workers send heartbeat every 5s. If missed × 3 → job reclaimed\n- **Idempotency keys:** Each execution has a unique `execution_id` — re-runs check for prior completion\n- **Dead Letter Queue:** Failed jobs stored for manual inspection/replay\n\n### Execution Semantics\n- At-least-once: retry on failure (default)\n- Exactly-once: requires idempotent jobs + execution log dedup",
+    "starter_code": {"text": "## Distributed Job Scheduler Design\n\n### Requirements & Scale\n\n### High-Level Architecture\n\n### Trigger Service (Cron Scanning)\n\n### Preventing Double Execution\n\n### Fault Tolerance & Retries\n\n### Monitoring & Alerting\n"},
+    "tags": ["distributed-systems", "fault-tolerance", "scheduling", "message-queue"],
+    "companies": ["Airbnb", "Amazon", "Uber", "LinkedIn", "Stripe"],
+    "metadata": {"time_limit": 3600000, "memory_limit": 256}
+  }
+]

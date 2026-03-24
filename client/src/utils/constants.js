@@ -64,3 +64,9 @@ export const ORACLE_REQUIREMENTS = {
 }
 
 export const API_BASE = '/api/v1'
+
+// Derives ws:// or wss:// from the current page protocol
+export const getWsUrl = (path) => {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${protocol}//${window.location.host}${path}`
+}

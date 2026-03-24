@@ -1,1 +1,170 @@
-[]
+[
+  {
+    "title": "Trapping Rain Water",
+    "slug": "trapping-rain-water",
+    "description": "Given `n` non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.\n\n**Example 1:**\n```\nInput:\n12\n0 1 0 2 1 0 1 3 2 1 2 1\nOutput: 6\n```\n\n**Example 2:**\n```\nInput:\n6\n4 2 0 3 2 5\nOutput: 9\n```",
+    "category": "arrays",
+    "test_cases": [
+      {"input": "12\n0 1 0 2 1 0 1 3 2 1 2 1", "expected_output": "6", "is_hidden": false},
+      {"input": "6\n4 2 0 3 2 5", "expected_output": "9", "is_hidden": false},
+      {"input": "1\n4", "expected_output": "0", "is_hidden": true},
+      {"input": "5\n3 0 0 0 3", "expected_output": "9", "is_hidden": true},
+      {"input": "4\n0 0 0 0", "expected_output": "0", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- n == height.length\n- 1 <= n <= 2 * 10^4\n- 0 <= height[i] <= 10^5",
+    "hints": [
+      "Water above position i is bounded by `min(max_left[i], max_right[i]) - height[i]`.",
+      "Precompute max heights from left and right — this is an O(n) approach.",
+      "For O(1) space, use two pointers from both ends, processing the shorter side first."
+    ],
+    "solution": "## Solution: Two Pointers\n\nMaintain `left_max` and `right_max` pointers from both ends. Process the side with the smaller max — water at that position is `max_side - height[pos]`.\n\n**Time:** O(n) | **Space:** O(1)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef trap(height):\n    # Your code here\n    pass\n\nn = int(input())\nheight = list(map(int, input().split()))\nprint(trap(height))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst height = lines[1].split(' ').map(Number);\nfunction trap(height) {\n  // Your code here\n}\nconsole.log(trap(height));"
+    },
+    "tags": ["arrays", "two-pointers", "stack", "dynamic-programming"],
+    "companies": ["Amazon", "Goldman Sachs", "Google", "Facebook", "Bloomberg"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Longest Increasing Subsequence",
+    "slug": "longest-increasing-subsequence",
+    "description": "Given an integer array `nums`, return the length of the longest strictly increasing subsequence.\n\nA subsequence is derived from the array by deleting some (or no) elements without changing the order of remaining elements.\n\n**Example 1:**\n```\nInput:\n8\n10 9 2 5 3 7 101 18\nOutput: 4\n```\nExplanation: [2,3,7,101] is the LIS with length 4.\n\n**Example 2:**\n```\nInput:\n7\n0 1 0 3 2 3 0\nOutput: 4\n```",
+    "category": "dynamic_programming",
+    "test_cases": [
+      {"input": "8\n10 9 2 5 3 7 101 18", "expected_output": "4", "is_hidden": false},
+      {"input": "7\n0 1 0 3 2 3 0", "expected_output": "4", "is_hidden": false},
+      {"input": "1\n0", "expected_output": "1", "is_hidden": true},
+      {"input": "5\n5 4 3 2 1", "expected_output": "1", "is_hidden": true},
+      {"input": "6\n1 2 3 4 5 6", "expected_output": "6", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= nums.length <= 2500\n- -10^4 <= nums[i] <= 10^4",
+    "hints": [
+      "The O(n²) DP approach: `dp[i]` = length of LIS ending at index `i`.",
+      "For each `i`, check all `j < i`: if `nums[j] < nums[i]`, then `dp[i] = max(dp[i], dp[j] + 1)`.",
+      "For O(n log n): maintain a `tails` array and use binary search to find where to place each element."
+    ],
+    "solution": "## Solution: Patience Sorting (O(n log n))\n\nMaintain a `tails` array where `tails[i]` is the smallest tail of all IS of length `i+1`. For each number, binary search for its position in `tails`. The length of `tails` at the end is the LIS length.\n\n**Time:** O(n log n) | **Space:** O(n)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef length_of_lis(nums):\n    # Your code here\n    pass\n\nn = int(input())\nnums = list(map(int, input().split()))\nprint(length_of_lis(nums))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nfunction lengthOfLIS(nums) {\n  // Your code here\n}\nconsole.log(lengthOfLIS(nums));"
+    },
+    "tags": ["dynamic-programming", "binary-search"],
+    "companies": ["Amazon", "Apple", "Microsoft", "Google"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Edit Distance",
+    "slug": "edit-distance",
+    "description": "Given two strings `word1` and `word2`, return the minimum number of operations (insert, delete, replace a character) to convert `word1` to `word2`.\n\n**Example 1:**\n```\nInput:\nhorse\nros\nOutput: 3\n```\nExplanation: horse → rorse (replace h→r) → rose (delete r) → ros (delete e)\n\n**Example 2:**\n```\nInput:\nintention\nexecution\nOutput: 5\n```",
+    "category": "dynamic_programming",
+    "test_cases": [
+      {"input": "horse\nros", "expected_output": "3", "is_hidden": false},
+      {"input": "intention\nexecution", "expected_output": "5", "is_hidden": false},
+      {"input": "a\na", "expected_output": "0", "is_hidden": true},
+      {"input": "abc\n", "expected_output": "3", "is_hidden": true},
+      {"input": "sunday\nsaturday", "expected_output": "3", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 0 <= word1.length, word2.length <= 500\n- word1 and word2 consist of lowercase English letters",
+    "hints": [
+      "This is a classic 2D DP problem. `dp[i][j]` = min edits to convert `word1[:i]` to `word2[:j]`.",
+      "If `word1[i-1] == word2[j-1]`: `dp[i][j] = dp[i-1][j-1]` (no operation needed).",
+      "Otherwise: `dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])` for delete, insert, replace."
+    ],
+    "solution": "## Solution: 2D DP (Levenshtein Distance)\n\nBuild `dp[m+1][n+1]`. Base cases: `dp[i][0] = i`, `dp[0][j] = j`. Fill by comparing characters.\n\n**Time:** O(m×n) | **Space:** O(m×n) or O(n) with rolling array",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef min_distance(word1, word2):\n    # Your code here\n    pass\n\nword1 = input().strip()\nword2 = input().strip()\nprint(min_distance(word1, word2))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst word1 = lines[0] || '';\nconst word2 = lines[1] || '';\nfunction minDistance(word1, word2) {\n  // Your code here\n}\nconsole.log(minDistance(word1, word2));"
+    },
+    "tags": ["dynamic-programming", "strings"],
+    "companies": ["Amazon", "Google", "Uber", "LinkedIn", "Microsoft"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Word Break",
+    "slug": "word-break",
+    "description": "Given a string `s` and a dictionary of strings `wordDict`, return `true` if `s` can be segmented into a space-separated sequence of one or more dictionary words.\n\n**Example 1:**\n```\nInput:\nleetcode\n2\nleet code\nOutput: true\n```\n\n**Example 2:**\n```\nInput:\napplepenapple\n3\napple pen apply\nOutput: false\n```\n\n**Example 3:**\n```\nInput:\ncatsandog\n5\ncats dog sand and cat\nOutput: false\n```",
+    "category": "dynamic_programming",
+    "test_cases": [
+      {"input": "leetcode\n2\nleet code", "expected_output": "true", "is_hidden": false},
+      {"input": "applepenapple\n3\napple pen apply", "expected_output": "false", "is_hidden": false},
+      {"input": "catsandog\n5\ncats dog sand and cat", "expected_output": "false", "is_hidden": false},
+      {"input": "applepenapple\n3\napple pen apple", "expected_output": "true", "is_hidden": true},
+      {"input": "a\n1\na", "expected_output": "true", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= s.length <= 300\n- 1 <= wordDict.length <= 1000\n- 1 <= wordDict[i].length <= 20\n- s and wordDict[i] consist of lowercase English letters\n- All wordDict entries are unique",
+    "hints": [
+      "Define `dp[i]` = true if `s[:i]` can be segmented using wordDict.",
+      "For each `i`, check all `j < i`: if `dp[j]` is true and `s[j:i]` is in wordDict, set `dp[i] = true`.",
+      "Use a set for O(1) dictionary lookup."
+    ],
+    "solution": "## Solution: Bottom-Up DP\n\n`dp[0] = True`. For each position `i` from 1 to n: for each `j` from 0 to i: if `dp[j]` and `s[j:i]` in word_set, set `dp[i] = True`.\n\n**Time:** O(n² × m) where m is avg word length | **Space:** O(n)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef word_break(s, word_dict):\n    # Your code here\n    pass\n\ns = input().strip()\nn = int(input())\nwords = input().split()\nprint('true' if word_break(s, words) else 'false')",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst s = lines[0];\nconst n = parseInt(lines[1]);\nconst words = lines[2].split(' ');\nfunction wordBreak(s, wordDict) {\n  // Your code here\n}\nconsole.log(wordBreak(s, words) ? 'true' : 'false');"
+    },
+    "tags": ["dynamic-programming", "strings", "hash-table"],
+    "companies": ["Amazon", "Bloomberg", "Facebook", "Google", "Lyft"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Largest Rectangle in Histogram",
+    "slug": "largest-rectangle-histogram",
+    "description": "Given an array of integers `heights` representing the heights of bars in a histogram (each bar has width 1), return the area of the largest rectangle.\n\n**Example 1:**\n```\nInput:\n6\n2 1 5 6 2 3\nOutput: 10\n```\n\n**Example 2:**\n```\nInput:\n2\n2 4\nOutput: 4\n```",
+    "category": "stacks_queues",
+    "test_cases": [
+      {"input": "6\n2 1 5 6 2 3", "expected_output": "10", "is_hidden": false},
+      {"input": "2\n2 4", "expected_output": "4", "is_hidden": false},
+      {"input": "1\n5", "expected_output": "5", "is_hidden": true},
+      {"input": "5\n5 5 5 5 5", "expected_output": "25", "is_hidden": true},
+      {"input": "7\n1 2 3 4 5 3 2", "expected_output": "15", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 1 <= heights.length <= 10^5\n- 0 <= heights[i] <= 10^4",
+    "hints": [
+      "For each bar, what is the largest rectangle that uses that bar as its shortest bar?",
+      "Use a monotonic increasing stack to track bars that could extend leftward.",
+      "When a shorter bar is encountered, pop taller bars and calculate their rectangles."
+    ],
+    "solution": "## Solution: Monotonic Stack\n\nMaintain a stack of indices with increasing heights. When a shorter bar is found, pop and compute area using the popped bar as height and current width.\n\n**Time:** O(n) | **Space:** O(n)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef largest_rectangle(heights):\n    # Your code here\n    pass\n\nn = int(input())\nheights = list(map(int, input().split()))\nprint(largest_rectangle(heights))",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst heights = lines[1].split(' ').map(Number);\nfunction largestRectangle(heights) {\n  // Your code here\n}\nconsole.log(largestRectangle(heights));"
+    },
+    "tags": ["stack", "arrays", "monotonic-stack"],
+    "companies": ["Amazon", "Facebook", "Google", "IXL"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  },
+  {
+    "title": "Median of Two Sorted Arrays",
+    "slug": "median-two-sorted-arrays",
+    "description": "Given two sorted arrays `nums1` and `nums2`, return the median of the two sorted arrays.\n\nThe overall run time complexity must be O(log(m+n)).\n\nOutput the median as a decimal with 1 decimal place.\n\n**Example 1:**\n```\nInput:\n2\n1 3\n1\n2\nOutput: 2.0\n```\n\n**Example 2:**\n```\nInput:\n2\n1 2\n2\n3 4\nOutput: 2.5\n```",
+    "category": "sorting_searching",
+    "test_cases": [
+      {"input": "2\n1 3\n1\n2", "expected_output": "2.0", "is_hidden": false},
+      {"input": "2\n1 2\n2\n3 4", "expected_output": "2.5", "is_hidden": false},
+      {"input": "0\n\n1\n1", "expected_output": "1.0", "is_hidden": true},
+      {"input": "1\n3\n2\n1 2", "expected_output": "2.0", "is_hidden": true},
+      {"input": "3\n1 3 5\n3\n2 4 6", "expected_output": "3.5", "is_hidden": true}
+    ],
+    "evaluation_criteria": [],
+    "constraints": "- 0 <= m, n <= 1000\n- 0 <= nums1[i], nums2[i] <= 10^6\n- m + n >= 1",
+    "hints": [
+      "The brute force is to merge both arrays and find the middle — O(m+n). Can you do O(log(m+n))?",
+      "Binary search on the smaller array. Find a partition of both arrays such that left halves combined contain exactly (m+n)/2 elements.",
+      "At the correct partition: `max_left1 <= min_right2` and `max_left2 <= min_right1`."
+    ],
+    "solution": "## Solution: Binary Search on Partition\n\nBinary search on the smaller array for a valid partition. At partition: `max(left_halves) <= min(right_halves)`. Median is computed from the boundary elements.\n\n**Time:** O(log(min(m,n))) | **Space:** O(1)",
+    "starter_code": {
+      "python": "import sys\ninput = sys.stdin.readline\n\ndef find_median(nums1, nums2):\n    # Your code here\n    pass\n\nn1 = int(input())\nnums1 = list(map(int, input().split())) if n1 > 0 else []\nn2 = int(input())\nnums2 = list(map(int, input().split())) if n2 > 0 else []\nresult = find_median(nums1, nums2)\nprint(f'{result:.1f}')",
+      "javascript": "const lines = require('fs').readFileSync('/dev/stdin','utf8').trim().split('\\n');\nlet i = 0;\nconst n1 = parseInt(lines[i++]);\nconst nums1 = n1 > 0 ? lines[i++].split(' ').map(Number) : (i++, []);\nconst n2 = parseInt(lines[i++]);\nconst nums2 = n2 > 0 ? lines[i++].split(' ').map(Number) : [];\nfunction findMedian(nums1, nums2) {\n  // Your code here\n}\nconsole.log(findMedian(nums1, nums2).toFixed(1));"
+    },
+    "tags": ["binary-search", "arrays", "divide-and-conquer"],
+    "companies": ["Amazon", "Apple", "Google", "Microsoft", "Adobe"],
+    "metadata": {"time_limit": 5000, "memory_limit": 256}
+  }
+]

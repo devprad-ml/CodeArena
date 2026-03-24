@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useArenaStore } from '@/store/arenaStore'
 import { useAuthStore } from '@/store/authStore'
 import { useTimer } from '@/hooks/useTimer'
 import { problemService } from '@/services/problemService'
 import { submissionService } from '@/services/submissionService'
-import { PATHS, TIMER_OPTIONS } from '@/utils/constants'
+import { PATHS, TIMER_OPTIONS, getWsUrl } from '@/utils/constants'
 import { CODE_TEMPLATES } from '@/utils/codeTemplates'
 
 import ProblemPanel from './ProblemPanel'
@@ -33,8 +33,20 @@ export default function CodingArena() {
   const [consoleOutput, setConsoleOutput] = useState({ output: '', error: '', isRunning: false })
   const [previousPoints, setPreviousPoints] = useState(0)
   const [testResults, setTestResults] = useState([])
+  const [wsStatus, setWsStatus] = useState(null) // null | 'connecting' | 'running' | 'done' | 'error'
+  const wsRef = useRef(null)
 
   const { seconds, running, start, pause, resume, reset } = useTimer(selectedMinutes * 60)
+
+  // Clean up WebSocket on unmount
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
+    }
+  }, [])
 
   // Load a random problem when the arena mounts
   const { isLoading: problemLoading } = useQuery({
@@ -54,7 +66,55 @@ export default function CodingArena() {
     }
   }, [language])
 
-  // Submit mutation
+  const connectSubmissionWs = (submissionId) => {
+    // Close any existing connection
+    if (wsRef.current) {
+      wsRef.current.close()
+    }
+
+    setWsStatus('connecting')
+    const ws = new WebSocket(getWsUrl(`/ws/submission/${submissionId}`))
+    wsRef.current = ws
+
+    ws.onopen = () => {
+      setWsStatus('running')
+    }
+
+    ws.onmessage = (event) => {
+      let payload
+      try { payload = JSON.parse(event.data) } catch { return }
+
+      if (payload.event === 'status') {
+        setWsStatus('running')
+        setConsoleOutput((prev) => ({ ...prev, isRunning: true }))
+      } else if (payload.event === 'result') {
+        setWsStatus('done')
+        setConsoleOutput({
+          output: payload.stdout ?? '',
+          error: payload.stderr ?? '',
+          isRunning: false,
+        })
+        setTestResults(payload.test_results ?? [])
+        setSubmissionResult(payload)
+        queryClient.invalidateQueries({ queryKey: ['me'] })
+        ws.close()
+        wsRef.current = null
+      } else if (payload.event === 'error') {
+        setWsStatus('error')
+        setConsoleOutput({ output: '', error: payload.message ?? 'Execution error', isRunning: false })
+        ws.close()
+        wsRef.current = null
+      }
+    }
+
+    ws.onerror = () => {
+      setWsStatus('error')
+      setConsoleOutput({ output: '', error: 'Connection lost. Please try again.', isRunning: false })
+      wsRef.current = null
+    }
+  }
+
+  // Submit mutation — POST creates the submission, then WS streams the result
   const submitMutation = useMutation({
     mutationFn: () => submissionService.submit(currentProblem._id, code, language),
     onMutate: () => {
@@ -66,10 +126,16 @@ export default function CodingArena() {
       setBottomTab('console')
     },
     onSuccess: (data) => {
-      setConsoleOutput({ output: data.stdout ?? '', error: data.stderr ?? '', isRunning: false })
-      setTestResults(data.test_results ?? [])
-      setSubmissionResult(data)
-      queryClient.invalidateQueries({ queryKey: ['me'] })
+      // data.id is the submission ID — open WS to stream real-time status
+      if (data?.id) {
+        connectSubmissionWs(data.id)
+      } else {
+        // Fallback: server returned a completed result directly
+        setConsoleOutput({ output: data.stdout ?? '', error: data.stderr ?? '', isRunning: false })
+        setTestResults(data.test_results ?? [])
+        setSubmissionResult(data)
+        queryClient.invalidateQueries({ queryKey: ['me'] })
+      }
     },
     onError: (err) => {
       setConsoleOutput({ output: '', error: err.message, isRunning: false })
@@ -77,6 +143,11 @@ export default function CodingArena() {
   })
 
   const handleNextProblem = () => {
+    if (wsRef.current) {
+      wsRef.current.close()
+      wsRef.current = null
+    }
+    setWsStatus(null)
     resetArena()
     setTestResults([])
     setConsoleOutput({ output: '', error: '', isRunning: false })
@@ -156,10 +227,14 @@ export default function CodingArena() {
           </button>
           <button
             onClick={() => submitMutation.mutate()}
-            disabled={submitMutation.isPending || !code.trim()}
+            disabled={submitMutation.isPending || wsStatus === 'connecting' || wsStatus === 'running' || !code.trim()}
             className={`text-xs text-white px-4 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50 ${btnClass}`}
           >
-            {submitMutation.isPending ? 'Submitting...' : 'Submit'}
+            {submitMutation.isPending || wsStatus === 'connecting'
+              ? 'Submitting...'
+              : wsStatus === 'running'
+              ? 'Running...'
+              : 'Submit'}
           </button>
         </div>
       </div>
