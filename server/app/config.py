@@ -35,9 +35,7 @@ class Settings(BaseSettings):
     PINECONE_API_KEY: str = ""
     PINECONE_INDEX: str = "grand-line-coder"
 
-    # Code Execution
-    JUDGE0_API_URL: str = "https://judge0-ce.p.rapidapi.com"
-    JUDGE0_API_KEY: str = ""
+    # Code Execution — uses Piston (free, no key required)
 
     class Config:
         env_file = ".env"

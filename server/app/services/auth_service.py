@@ -10,9 +10,9 @@ class AuthService:
     def __init__(self):
         self.user_repo = UserRepository()
 
-    async def handle_google_callback(self, code: str) -> str:
+    async def handle_google_callback(self, request) -> str:
         """Handle Google OAuth callback and return JWT token"""
-        token = await google_oauth.authorize_access_token(code)
+        token = await google_oauth.authorize_access_token(request)
         user_info = token.get("userinfo")
 
         user = await self._get_or_create_user(
@@ -25,13 +25,27 @@ class AuthService:
 
         return self.create_token(user.id)
 
-    async def handle_github_callback(self, code: str) -> str:
+    async def handle_github_callback(self, request) -> str:
         """Handle GitHub OAuth callback and return JWT token"""
-        token = await github_oauth.authorize_access_token(code)
-        user_info = token.get("userinfo")
+        token = await github_oauth.authorize_access_token(request)
+
+        # GitHub doesn't include userinfo in the token — fetch it separately
+        resp = await github_oauth.get("https://api.github.com/user", token=token)
+        user_info = resp.json()
+
+        email = user_info.get("email") or ""
+        # If email is private, fetch from the emails endpoint
+        if not email:
+            emails_resp = await github_oauth.get(
+                "https://api.github.com/user/emails", token=token
+            )
+            for entry in emails_resp.json():
+                if entry.get("primary") and entry.get("verified"):
+                    email = entry["email"]
+                    break
 
         user = await self._get_or_create_user(
-            email=user_info.get("email", ""),
+            email=email,
             username=user_info.get("login", ""),
             avatar=user_info.get("avatar_url"),
             provider="github",

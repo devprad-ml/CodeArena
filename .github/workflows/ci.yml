@@ -31,7 +31,6 @@ jobs:
           MONGODB_URL: mongodb://localhost:27017
           REDIS_URL: redis://localhost:6379
           JWT_SECRET_KEY: test-secret-key
-          JUDGE0_API_KEY: test
           ANTHROPIC_API_KEY: test
           GOOGLE_CLIENT_ID: test
           GOOGLE_CLIENT_SECRET: test

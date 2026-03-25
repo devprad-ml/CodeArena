@@ -32,7 +32,10 @@ export default function ProblemPanel() {
     )
   }
 
-  const { title, difficulty, category, description, examples = [], constraints = [] } = currentProblem
+  const { title, difficulty, category, description, examples = [] } = currentProblem
+  const constraints = Array.isArray(currentProblem.constraints)
+    ? currentProblem.constraints
+    : (currentProblem.constraints || '').split('\n').filter(Boolean)
 
   return (
     <div className="h-full overflow-y-auto px-5 py-4 text-sm text-gray-300">

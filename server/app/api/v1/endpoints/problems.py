@@ -36,7 +36,10 @@ async def get_random_problem(
 ):
     """Get random problem"""
     problem_service = ProblemService()
-    return await problem_service.get_random_problem(path, difficulty, category)
+    problem = await problem_service.get_random_problem(path, difficulty, category)
+    if not problem:
+        raise HTTPException(status_code=404, detail="No problems found")
+    return problem
 
 
 @router.get("/{problem_id}", response_model=ProblemResponse)

@@ -2,13 +2,20 @@ import { useArenaStore } from '@/store/arenaStore'
 import { PATHS } from '@/utils/constants'
 
 export default function PathSelector({ fighterPoints = 0, sentinelPoints = 0 }) {
-  const { activePath, setActivePath } = useArenaStore()
+  const { activePath, setActivePath, resetArena } = useArenaStore()
+
+  const handlePathChange = (path) => {
+    if (path !== activePath) {
+      resetArena()
+      setActivePath(path)
+    }
+  }
 
   return (
     <div className="grid grid-cols-2 gap-4 mb-8">
       {/* Fighter Path */}
       <button
-        onClick={() => setActivePath(PATHS.FIGHTER)}
+        onClick={() => handlePathChange(PATHS.FIGHTER)}
         className={`relative p-6 rounded-xl border-2 text-left transition-all duration-300 ${
           activePath === PATHS.FIGHTER
             ? 'border-fighter-primary bg-fighter-surface glow-fighter'
@@ -26,7 +33,7 @@ export default function PathSelector({ fighterPoints = 0, sentinelPoints = 0 }) 
 
       {/* Sentinel Path */}
       <button
-        onClick={() => setActivePath(PATHS.SENTINEL)}
+        onClick={() => handlePathChange(PATHS.SENTINEL)}
         className={`relative p-6 rounded-xl border-2 text-left transition-all duration-300 ${
           activePath === PATHS.SENTINEL
             ? 'border-sentinel-primary bg-sentinel-surface glow-sentinel'

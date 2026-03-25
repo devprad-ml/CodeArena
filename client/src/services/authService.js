@@ -2,7 +2,7 @@ import api from './api'
 
 export const authService = {
   async getMe() {
-    const { data } = await api.get('/users/me')
+    const { data } = await api.get('/users/profile')
     return data
   },
 
