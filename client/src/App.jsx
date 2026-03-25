@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Navbar from '@/components/shared/Navbar'
 import Footer from '@/components/shared/Footer'
 import LoginPage from '@/components/auth/LoginPage'
+import AuthCallback from '@/components/auth/AuthCallback'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import Dashboard from '@/components/dashboard/Dashboard'
 import CodingArena from '@/components/coding/CodingArena'
@@ -21,6 +22,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 
 from app.config import settings
@@ -26,6 +27,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.add_middleware(SessionMiddleware, secret_key=settings.JWT_SECRET)
 
 # CORS
 app.add_middleware(

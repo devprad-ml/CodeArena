@@ -12,13 +12,13 @@ async def seed_problems():
     await connect_to_mongo()
     db = get_database()
 
-    data_dir = Path(__file__).parent / "problems"
+    data_dir = Path(__file__).parent / "data" / "problems"
 
     # Seed DSA problems
     for difficulty in ["easy", "medium", "hard"]:
         filepath = data_dir / "dsa" / f"{difficulty}.json"
         if filepath.exists():
-            with open(filepath) as f:
+            with open(filepath, encoding="utf-8") as f:
                 problems = json.load(f)
                 if problems:
                     for p in problems:
@@ -31,7 +31,7 @@ async def seed_problems():
     for category in ["lld", "hld"]:
         filepath = data_dir / "system_design" / f"{category}.json"
         if filepath.exists():
-            with open(filepath) as f:
+            with open(filepath, encoding="utf-8") as f:
                 problems = json.load(f)
                 if problems:
                     for p in problems:

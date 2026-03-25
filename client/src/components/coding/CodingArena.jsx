@@ -49,15 +49,20 @@ export default function CodingArena() {
   }, [])
 
   // Load a random problem when the arena mounts
-  const { isLoading: problemLoading } = useQuery({
+  const { data: fetchedProblem, isError: problemError } = useQuery({
     queryKey: ['random-problem', activePath],
     queryFn: () => problemService.getRandomProblem(activePath, null),
-    onSuccess: (data) => {
-      setCurrentProblem(data)
-      setCode(CODE_TEMPLATES[language] ?? '')
-    },
     enabled: !currentProblem,
+    staleTime: Infinity,
+    retry: 1,
   })
+
+  useEffect(() => {
+    if (fetchedProblem && !currentProblem) {
+      setCurrentProblem(fetchedProblem)
+      setCode(CODE_TEMPLATES[language] ?? '')
+    }
+  }, [fetchedProblem])
 
   // Reset code template when language changes
   useEffect(() => {
@@ -154,7 +159,16 @@ export default function CodingArena() {
     queryClient.invalidateQueries({ queryKey: ['random-problem', activePath] })
   }
 
-  if (problemLoading) {
+  if (problemError) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center flex-col gap-3">
+        <p className="text-red-400 text-sm">Failed to load problem. Check the console.</p>
+        <button onClick={() => window.location.reload()} className="text-xs text-gray-400 underline">Retry</button>
+      </div>
+    )
+  }
+
+  if (!currentProblem) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <LoadingSpinner size="lg" color={activePath} />
