@@ -185,6 +185,29 @@ SYSTEM_DESIGN_CATEGORIES = {
     ],
 }
 
+# Achievement definitions — IDs must match AchievementBadges.jsx
+ACHIEVEMENTS = [
+    # Fighter
+    {"id": "first_blood",   "label": "First Blood",    "desc": "Solve your first problem",          "path": "fighter"},
+    {"id": "hat_trick",     "label": "Hat Trick",      "desc": "Solve 3 problems in a row",         "path": "fighter"},
+    {"id": "speed_demon",   "label": "Speed Demon",    "desc": "Solve a hard problem under 10 min", "path": "fighter"},
+    {"id": "perfectionist", "label": "Perfectionist",  "desc": "First-try on 10 problems",          "path": "fighter"},
+    {"id": "grinder",       "label": "Grinder",        "desc": "Solve 50 problems total",           "path": "fighter"},
+    {"id": "graph_master",  "label": "Graph Master",   "desc": "Complete all graph problems",       "path": "fighter"},
+    {"id": "dp_wizard",     "label": "DP Wizard",      "desc": "Solve 10 DP problems",              "path": "fighter"},
+    {"id": "legend_born",   "label": "Legend Born",    "desc": "Achieve LEGEND rank",               "path": "fighter"},
+    # Sentinel
+    {"id": "architect",     "label": "Architect",      "desc": "Complete your first system design", "path": "sentinel"},
+    {"id": "load_balancer", "label": "Load Balancer",  "desc": "Score 90%+ on 5 designs",           "path": "sentinel"},
+    {"id": "fault_tolerant","label": "Fault Tolerant", "desc": "Zero hint usage on 5 problems",     "path": "sentinel"},
+    {"id": "scalable",      "label": "Scalable",       "desc": "Complete 10 HLD problems",          "path": "sentinel"},
+    {"id": "oracle_born",   "label": "Oracle Born",    "desc": "Achieve ORACLE rank",               "path": "sentinel"},
+    # General
+    {"id": "streak_7",      "label": "Week Warrior",   "desc": "7-day streak",                      "path": "general"},
+    {"id": "streak_30",     "label": "Month Master",   "desc": "30-day streak",                     "path": "general"},
+    {"id": "dual_path",     "label": "Dual Threat",    "desc": "Earn 100 pts on both paths",        "path": "general"},
+]
+
 # Difficulty mappings based on rank
 RANK_DIFFICULTY_MAP = {
     "fighter": {

@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from bson import ObjectId
 
@@ -55,5 +55,17 @@ class UserRepository:
         """Update user fields"""
         await self.collection.update_one(
             {"_id": ObjectId(user_id)}, {"$set": update_data}
+        )
+        return await self.get_by_id(user_id)
+
+    async def add_achievements(
+        self, user_id: str, achievement_ids: List[str]
+    ) -> Optional[User]:
+        """Add achievement IDs to user (no duplicates via $addToSet)"""
+        if not achievement_ids:
+            return await self.get_by_id(user_id)
+        await self.collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$addToSet": {"achievements": {"$each": achievement_ids}}},
         )
         return await self.get_by_id(user_id)
