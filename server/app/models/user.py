@@ -12,6 +12,7 @@ class ProgressData(BaseModel):
     best_streak: int = 0
     wrong_submissions: int = 0
     first_try_successes: int = 0
+    last_activity_date: Optional[datetime] = None
 
 
 class UserPreferences(BaseModel):

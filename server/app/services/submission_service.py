@@ -7,6 +7,7 @@ from app.models.submission import Submission
 from app.services.code_executor import CodeExecutor
 from app.services.rank_service import RankService
 from app.services.ai_judge import AIJudge
+from app.services.achievement_service import AchievementService
 from app.core.ws_manager import ws_manager
 
 
@@ -18,6 +19,7 @@ class SubmissionService:
         self.code_executor = CodeExecutor()
         self.rank_service = RankService()
         self.ai_judge = AIJudge()
+        self.achievement_service = AchievementService()
 
     async def create_submission(
         self,
@@ -94,10 +96,17 @@ class SubmissionService:
                 },
             )
 
+            new_achievements = []
             if all_passed:
-                await self.rank_service.update_user_progress(
+                updated_user = await self.rank_service.update_user_progress(
                     submission.user_id, submission.path, points, submission.attempt_number
                 )
+                if updated_user:
+                    new_achievements = await self.achievement_service.check_and_award(
+                        updated_user,
+                        submission.path,
+                        {"difficulty": getattr(submission, "difficulty", None)},
+                    )
 
             await ws_manager.broadcast(
                 submission.id,
@@ -108,6 +117,7 @@ class SubmissionService:
                     "test_results": test_results_data,
                     "stdout": results.stdout if hasattr(results, "stdout") else "",
                     "stderr": results.stderr if hasattr(results, "stderr") else "",
+                    "new_achievements": new_achievements,
                 },
             )
 
@@ -146,10 +156,17 @@ class SubmissionService:
                 },
             )
 
+            new_achievements = []
             if is_passing:
-                await self.rank_service.update_user_progress(
+                updated_user = await self.rank_service.update_user_progress(
                     submission.user_id, submission.path, points, submission.attempt_number
                 )
+                if updated_user:
+                    new_achievements = await self.achievement_service.check_and_award(
+                        updated_user,
+                        submission.path,
+                        {"ai_score": evaluation.overall_score},
+                    )
 
             await ws_manager.broadcast(
                 submission.id,
@@ -158,6 +175,7 @@ class SubmissionService:
                     "status": status,
                     "points_awarded": points,
                     "ai_evaluation": ai_eval_data,
+                    "new_achievements": new_achievements,
                 },
             )
 

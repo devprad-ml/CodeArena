@@ -1,6 +1,8 @@
-from typing import Tuple, Dict, List
+from datetime import datetime, timezone
+from typing import Optional, Tuple, Dict, List
 
 from app.db.repositories.user_repo import UserRepository
+from app.models.user import User
 from app.utils.constants import (
     FIGHTER_RANKS,
     SENTINEL_RANKS,
@@ -41,11 +43,11 @@ class RankService:
         path: str,
         points: int,
         attempt_number: int,
-    ):
-        """Update user progress after a successful submission"""
+    ) -> Optional[User]:
+        """Update user progress after a successful submission. Returns updated user."""
         user = await self.user_repo.get_by_id(user_id)
         if not user:
-            return
+            return None
 
         progress_field = f"{path}_progress"
         progress = getattr(user, progress_field)
@@ -54,10 +56,33 @@ class RankService:
         new_total = progress.total_points + points
         new_solved = progress.problems_solved + 1
 
+        # ── Streak calculation ────────────────────────────────────────────
+        now = datetime.now(timezone.utc)
+        today = now.date()
+        last_date = (
+            progress.last_activity_date.date()
+            if progress.last_activity_date
+            else None
+        )
+
+        if last_date is None or (today - last_date).days > 1:
+            new_streak = 1
+        elif (today - last_date).days == 1:
+            new_streak = progress.current_streak + 1
+        else:
+            # same day — keep streak unchanged
+            new_streak = progress.current_streak
+
+        new_best = max(progress.best_streak, new_streak)
+        # ─────────────────────────────────────────────────────────────────
+
         update_data = {
             f"{progress_field}.points": new_points,
             f"{progress_field}.total_points": new_total,
             f"{progress_field}.problems_solved": new_solved,
+            f"{progress_field}.current_streak": new_streak,
+            f"{progress_field}.best_streak": new_best,
+            f"{progress_field}.last_activity_date": now,
         }
 
         if attempt_number == 1:
@@ -69,7 +94,7 @@ class RankService:
         rank_info = self.get_rank_info(path, new_total)
         update_data[f"{progress_field}.rank"] = rank_info["rank_index"]
 
-        await self.user_repo.update(user_id, update_data)
+        return await self.user_repo.update(user_id, update_data)
 
     async def apply_hint_penalty(self, user_id: str, path: str):
         """Apply hint penalty to user"""
